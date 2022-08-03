@@ -1,0 +1,386 @@
+//// ------------------------------------------------------
+//// THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+//// ------------------------------------------------------
+
+Table State {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [default: `now()`, not null]
+  name String [not null]
+  abbreviation String [not null]
+  people Person [not null]
+  Politician Politician [not null]
+  Candidate Candidate [not null]
+}
+
+Table View {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [default: `now()`, not null]
+  name String [not null]
+  description String [not null]
+  economics Int
+  social Int
+  freedom Int
+  people Person [not null]
+  organizations Organization [not null]
+  candidates Candidate [not null]
+  politicians Politician [not null]
+}
+
+Table Person {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [default: `now()`, not null]
+  name String [not null]
+  surname String [not null]
+  email String [unique, not null]
+  cpf Int [unique, not null]
+  password String [not null]
+  birthDate DateTime
+  sex Sex
+  gender String
+  economicClass EconomicClass
+  skinColor SkinColor
+  voteState State [not null]
+  voteStateId String [not null]
+  Contact Contact
+  views View [not null]
+  Politician Politician
+  Candidate Candidate
+  Sentiment Sentiment [not null]
+}
+
+Table Organization {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [default: `now()`, not null]
+  type OrganizationType [not null]
+  cnpj Int [unique, not null]
+  name String [not null]
+  logoUrl String
+  abbreviation String
+  email String
+  password String
+  mainColor String
+  secondaryColor String
+  about String
+  contact Contact
+  views View [not null]
+  politicians Politician [not null]
+  candidates Candidate [not null]
+  voteGuidances VoteGuidance [not null]
+  news News [not null]
+  newsOpinions NewsOpinion [not null]
+  Source Source
+}
+
+Table Contact {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [default: `now()`, not null]
+  telephone String
+  email String
+  address String
+  twitter String
+  facebook String
+  instagram String
+  linkedin String
+  website String [not null]
+  person Person [not null]
+  personId String [unique, not null]
+  organization Organization [not null]
+  organizationId String [unique, not null]
+}
+
+Table Candidate {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [default: `now()`, not null]
+  name String [not null]
+  description String [not null]
+  person Person [not null]
+  personId String [unique, not null]
+  party Organization [not null]
+  partyId String [unique, not null]
+  state State [not null]
+  stateId String [unique, not null]
+  views View [not null]
+  sentiments Sentiment [not null]
+  news News [not null]
+}
+
+Table Politician {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [default: `now()`, not null]
+  name String [not null]
+  description String [not null]
+  person Person [not null]
+  personId String [unique, not null]
+  party Organization [not null]
+  partyId String [unique, not null]
+  state State [not null]
+  stateId String [unique, not null]
+  views View [not null]
+  votes Vote [not null]
+  news News [not null]
+  mandates Mandate [not null]
+  scores PeriodScore [not null]
+}
+
+Table Theme {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [default: `now()`, not null]
+  name String [not null]
+  scores PeriodScore [not null]
+}
+
+Table PeriodScore {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [default: `now()`, not null]
+  startDate DateTime [not null]
+  endDate DateTime [not null]
+  politician Politician [not null]
+  politicianId String [not null]
+  theme Theme [not null]
+  themeId String [not null]
+  value Int [not null]
+}
+
+Table Mandate {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [default: `now()`, not null]
+  mandate String [not null]
+  description String [not null]
+  startDate DateTime [not null]
+  endDate DateTime [not null]
+  politician Politician [not null]
+  politicianId String [unique, not null]
+  roles Role [not null]
+}
+
+Table Role {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [default: `now()`, not null]
+  type String [not null]
+  startDate DateTime [not null]
+  endDate DateTime [not null]
+  mandate Mandate [not null]
+  mandateId String [unique, not null]
+}
+
+Table Sentiment {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [default: `now()`, not null]
+  name String [not null]
+  person Person [not null]
+  personId String [unique, not null]
+  candidate Candidate [not null]
+  candidateId String [unique, not null]
+}
+
+Table Voting {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [default: `now()`, not null]
+  name String [not null]
+  title String [not null]
+  description String [not null]
+  votes Vote [not null]
+  guidances VoteGuidance [not null]
+}
+
+Table Vote {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [default: `now()`, not null]
+  voting Voting [not null]
+  votingId String [unique, not null]
+  politician Politician [not null]
+  politicianId String [unique, not null]
+  vote VoteOptions [not null]
+}
+
+Table VoteGuidance {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [default: `now()`, not null]
+  voting Voting [not null]
+  votingId String [unique, not null]
+  organization Organization [not null]
+  organizationId String [unique, not null]
+  opinion String [not null]
+  vote VoteGuidanceOptions [not null]
+  points Int [not null]
+}
+
+Table News {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [default: `now()`, not null]
+  title String [not null]
+  description String [not null]
+  imageUrl String
+  date DateTime [not null]
+  sources Source [not null]
+  candidates Candidate [not null]
+  politicians Politician [not null]
+  organizations Organization [not null]
+  opinions NewsOpinion [not null]
+}
+
+Table Source {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [default: `now()`, not null]
+  organization Organization [not null]
+  organizationId String [unique, not null]
+  url String [not null]
+  date DateTime [not null]
+  News News
+  newsId String
+}
+
+Table NewsOpinion {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [default: `now()`, not null]
+  news News [not null]
+  newsId String [unique, not null]
+  organization Organization [not null]
+  organizationId String [unique, not null]
+  opinion String [not null]
+  points Int [not null]
+}
+
+Table PersonToView {
+  peopleId String [ref: > Person.id]
+  viewsId String [ref: > View.id]
+}
+
+Table OrganizationToView {
+  organizationsId String [ref: > Organization.id]
+  viewsId String [ref: > View.id]
+}
+
+Table CandidateToView {
+  candidatesId String [ref: > Candidate.id]
+  viewsId String [ref: > View.id]
+}
+
+Table PoliticianToView {
+  politiciansId String [ref: > Politician.id]
+  viewsId String [ref: > View.id]
+}
+
+Table NewsToOrganization {
+  newsId String [ref: > News.id]
+  organizationsId String [ref: > Organization.id]
+}
+
+Table CandidateToNews {
+  newsId String [ref: > News.id]
+  candidatesId String [ref: > Candidate.id]
+}
+
+Table NewsToPolitician {
+  newsId String [ref: > News.id]
+  politiciansId String [ref: > Politician.id]
+}
+
+Enum EconomicClass {
+  A
+  B
+  C
+  D
+  E
+}
+
+Enum SkinColor {
+  White
+  Black
+  Brown
+  Yellow
+  Other
+}
+
+Enum OrganizationType {
+  PoliticalParty
+  ThinkTank
+  Media
+  Government
+}
+
+Enum Sex {
+  Male
+  Female
+}
+
+Enum VoteOptions {
+  Yes
+  No
+  Absent
+}
+
+Enum MandateOptions {
+  DeputadoFederal
+  Senador
+}
+
+Enum VoteGuidanceOptions {
+  Yes
+  No
+  Any
+}
+
+Ref: Person.voteStateId > State.id
+
+Ref: Contact.personId - Person.id
+
+Ref: Contact.organizationId - Organization.id
+
+Ref: Candidate.personId - Person.id
+
+Ref: Candidate.partyId > Organization.id
+
+Ref: Candidate.stateId > State.id
+
+Ref: Politician.personId - Person.id
+
+Ref: Politician.partyId > Organization.id
+
+Ref: Politician.stateId > State.id
+
+Ref: PeriodScore.politicianId > Politician.id
+
+Ref: PeriodScore.themeId > Theme.id
+
+Ref: Mandate.politicianId > Politician.id
+
+Ref: Role.mandateId > Mandate.id
+
+Ref: Sentiment.personId > Person.id
+
+Ref: Sentiment.candidateId > Candidate.id
+
+Ref: Vote.votingId > Voting.id
+
+Ref: Vote.politicianId > Politician.id
+
+Ref: VoteGuidance.votingId > Voting.id
+
+Ref: VoteGuidance.organizationId > Organization.id
+
+Ref: Source.organizationId - Organization.id
+
+Ref: Source.newsId > News.id
+
+Ref: NewsOpinion.newsId > News.id
+
+Ref: NewsOpinion.organizationId > Organization.id

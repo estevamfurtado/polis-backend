@@ -7,6 +7,10 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+generator dbml {
+  provider = "prisma-dbml-generator"
+}
+
 // ENUMS -----------------------------------------------------------------
 
 enum EconomicClass {
@@ -133,12 +137,41 @@ model Organization {
   contact Contact?
   views   View[]
 
-  politicians   Politician[]
-  candidates    Candidate[]
-  voteGuidances VoteGuidance[]
-  news          News[]
-  newsOpinions  NewsOpinion[]
-  Source        Source?
+  politicians      Politician[]
+  candidates       Candidate[]
+  voteGuidances    VoteGuidance[]
+  news             News[]
+  newsOpinions     NewsOpinion[]
+  sources          Source[]
+  ThemesEvaluation ThemesEvaluation[]
+}
+
+model ThemesEvaluation {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+
+  name        String
+  description String
+
+  themesWeights ThemeWeight[]
+
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  organizationId String
+}
+
+model ThemeWeight {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+
+  evaluation   ThemesEvaluation @relation(fields: [evaluationId], references: [id])
+  evaluationId String
+
+  theme   Theme  @relation(fields: [themeId], references: [id])
+  themeId String
+
+  weight Int
 }
 
 model Contact {
@@ -204,8 +237,9 @@ model Theme {
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now())
 
-  name   String
-  scores PeriodScore[]
+  name        String
+  scores      PeriodScore[]
+  ThemeWeight ThemeWeight[]
 }
 
 model PeriodScore {
