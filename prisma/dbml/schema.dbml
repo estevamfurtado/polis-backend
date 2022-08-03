@@ -9,8 +9,8 @@ Table State {
   name String [not null]
   abbreviation String [not null]
   people Person [not null]
-  Politician Politician [not null]
-  Candidate Candidate [not null]
+  politicians Politician [not null]
+  candidates Candidate [not null]
 }
 
 Table View {
@@ -33,9 +33,8 @@ Table Person {
   createdAt DateTime [default: `now()`, not null]
   updatedAt DateTime [default: `now()`, not null]
   name String [not null]
-  surname String [not null]
-  email String [unique, not null]
   cpf Int [unique, not null]
+  phone String [not null]
   password String [not null]
   birthDate DateTime
   sex Sex
@@ -46,9 +45,9 @@ Table Person {
   voteStateId String [not null]
   Contact Contact
   views View [not null]
-  Politician Politician
-  Candidate Candidate
-  Sentiment Sentiment [not null]
+  sentiments Sentiment [not null]
+  politicianProfile Politician
+  candidateProfile Candidate
 }
 
 Table Organization {
@@ -70,9 +69,33 @@ Table Organization {
   politicians Politician [not null]
   candidates Candidate [not null]
   voteGuidances VoteGuidance [not null]
-  news News [not null]
+  citedInNews News [not null]
   newsOpinions NewsOpinion [not null]
-  Source Source
+  sources Source [not null]
+  themesEvaluations ThemesEvaluation [not null]
+  createdNews News [not null]
+}
+
+Table ThemesEvaluation {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [default: `now()`, not null]
+  name String [not null]
+  description String [not null]
+  themesWeights ThemeWeight [not null]
+  organization Organization [not null]
+  organizationId String [not null]
+}
+
+Table ThemeWeight {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [default: `now()`, not null]
+  evaluation ThemesEvaluation [not null]
+  evaluationId String [not null]
+  theme Theme [not null]
+  themeId String [not null]
+  weight Int [not null]
 }
 
 Table Contact {
@@ -135,6 +158,7 @@ Table Theme {
   updatedAt DateTime [default: `now()`, not null]
   name String [not null]
   scores PeriodScore [not null]
+  ThemeWeight ThemeWeight [not null]
 }
 
 Table PeriodScore {
@@ -228,10 +252,12 @@ Table News {
   description String [not null]
   imageUrl String
   date DateTime [not null]
+  createdBy Organization [not null]
+  createdById String [unique, not null]
   sources Source [not null]
-  candidates Candidate [not null]
-  politicians Politician [not null]
-  organizations Organization [not null]
+  candidatesCited Candidate [not null]
+  politiciansCited Politician [not null]
+  organizationsCited Organization [not null]
   opinions NewsOpinion [not null]
 }
 
@@ -280,18 +306,18 @@ Table PoliticianToView {
 }
 
 Table NewsToOrganization {
-  newsId String [ref: > News.id]
-  organizationsId String [ref: > Organization.id]
+  citedinnewsId String [ref: > News.id]
+  organizationscitedId String [ref: > Organization.id]
 }
 
 Table CandidateToNews {
   newsId String [ref: > News.id]
-  candidatesId String [ref: > Candidate.id]
+  candidatescitedId String [ref: > Candidate.id]
 }
 
 Table NewsToPolitician {
   newsId String [ref: > News.id]
-  politiciansId String [ref: > Politician.id]
+  politicianscitedId String [ref: > Politician.id]
 }
 
 Enum EconomicClass {
@@ -341,6 +367,12 @@ Enum VoteGuidanceOptions {
 
 Ref: Person.voteStateId > State.id
 
+Ref: ThemesEvaluation.organizationId > Organization.id
+
+Ref: ThemeWeight.evaluationId > ThemesEvaluation.id
+
+Ref: ThemeWeight.themeId > Theme.id
+
 Ref: Contact.personId - Person.id
 
 Ref: Contact.organizationId - Organization.id
@@ -377,7 +409,9 @@ Ref: VoteGuidance.votingId > Voting.id
 
 Ref: VoteGuidance.organizationId > Organization.id
 
-Ref: Source.organizationId - Organization.id
+Ref: News.createdById > Organization.id
+
+Ref: Source.organizationId > Organization.id
 
 Ref: Source.newsId > News.id
 

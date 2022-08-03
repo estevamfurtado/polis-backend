@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "esModuleInterop": true,
-    "module": "es6",
+    "module": "es2022", // es6
     "moduleResolution": "node",
     "outDir": "dist"
   },

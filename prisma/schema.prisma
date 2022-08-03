@@ -11,53 +11,6 @@ generator dbml {
   provider = "prisma-dbml-generator"
 }
 
-// ENUMS -----------------------------------------------------------------
-
-enum EconomicClass {
-  A
-  B
-  C
-  D
-  E
-}
-
-enum SkinColor {
-  White
-  Black
-  Brown
-  Yellow
-  Other
-}
-
-enum OrganizationType {
-  PoliticalParty
-  ThinkTank
-  Media
-  Government
-}
-
-enum Sex {
-  Male
-  Female
-}
-
-enum VoteOptions {
-  Yes
-  No
-  Absent
-}
-
-enum MandateOptions {
-  DeputadoFederal
-  Senador
-}
-
-enum VoteGuidanceOptions {
-  Yes
-  No
-  Any
-}
-
 // MODELS -----------------------------------------------------------------
 
 model State {
@@ -67,8 +20,8 @@ model State {
   name         String
   abbreviation String
   people       Person[]
-  Politician   Politician[]
-  Candidate    Candidate[]
+  politicians  Politician[]
+  candidates   Candidate[]
 }
 
 model View {
@@ -95,9 +48,8 @@ model Person {
   updatedAt DateTime @default(now())
 
   name     String
-  surname  String
-  email    String @unique
-  cpf      Int    @unique
+  cpf      String @unique
+  phone    String
   password String
 
   birthDate     DateTime?
@@ -110,12 +62,12 @@ model Person {
   voteStateId String
 
   Contact Contact?
-  views   View[]
 
-  Politician Politician?
-  Candidate  Candidate?
+  views      View[]
+  sentiments Sentiment[]
 
-  Sentiment Sentiment[]
+  politicianProfile Politician?
+  candidateProfile  Candidate?
 }
 
 model Organization {
@@ -124,7 +76,7 @@ model Organization {
   updatedAt DateTime @default(now())
 
   type           OrganizationType
-  cnpj           Int              @unique
+  cnpj           String           @unique
   name           String
   logoUrl        String?
   abbreviation   String?
@@ -137,13 +89,14 @@ model Organization {
   contact Contact?
   views   View[]
 
-  politicians      Politician[]
-  candidates       Candidate[]
-  voteGuidances    VoteGuidance[]
-  news             News[]
-  newsOpinions     NewsOpinion[]
-  sources          Source[]
-  ThemesEvaluation ThemesEvaluation[]
+  politicians       Politician[]
+  candidates        Candidate[]
+  voteGuidances     VoteGuidance[]
+  citedInNews       News[]
+  newsOpinions      NewsOpinion[]
+  sources           Source[]
+  themesEvaluations ThemesEvaluation[]
+  createdNews       News[]             @relation(name: "NewsCreatedByOrganization")
 }
 
 model ThemesEvaluation {
@@ -354,11 +307,14 @@ model News {
   imageUrl    String?
   date        DateTime
 
+  createdBy   Organization @relation(name: "NewsCreatedByOrganization", fields: [createdById], references: [id])
+  createdById String       @unique
+
   sources Source[]
 
-  candidates    Candidate[]
-  politicians   Politician[]
-  organizations Organization[]
+  candidatesCited    Candidate[]
+  politiciansCited   Politician[]
+  organizationsCited Organization[]
 
   opinions NewsOpinion[]
 }
@@ -391,4 +347,51 @@ model NewsOpinion {
 
   opinion String
   points  Int
+}
+
+// ENUMS -----------------------------------------------------------------
+
+enum EconomicClass {
+  A
+  B
+  C
+  D
+  E
+}
+
+enum SkinColor {
+  White
+  Black
+  Brown
+  Yellow
+  Other
+}
+
+enum OrganizationType {
+  PoliticalParty
+  ThinkTank
+  Media
+  Government
+}
+
+enum Sex {
+  Male
+  Female
+}
+
+enum VoteOptions {
+  Yes
+  No
+  Absent
+}
+
+enum MandateOptions {
+  DeputadoFederal
+  Senador
+}
+
+enum VoteGuidanceOptions {
+  Yes
+  No
+  Any
 }
