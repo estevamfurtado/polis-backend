@@ -1,0 +1,360 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ENUMS -----------------------------------------------------------------
+
+enum EconomicClass {
+  A
+  B
+  C
+  D
+  E
+}
+
+enum SkinColor {
+  White
+  Black
+  Brown
+  Yellow
+  Other
+}
+
+enum OrganizationType {
+  PoliticalParty
+  ThinkTank
+  Media
+  Government
+}
+
+enum Sex {
+  Male
+  Female
+}
+
+enum VoteOptions {
+  Yes
+  No
+  Absent
+}
+
+enum MandateOptions {
+  DeputadoFederal
+  Senador
+}
+
+enum VoteGuidanceOptions {
+  Yes
+  No
+  Any
+}
+
+// MODELS -----------------------------------------------------------------
+
+model State {
+  id           String       @id @default(cuid())
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @default(now())
+  name         String
+  abbreviation String
+  people       Person[]
+  Politician   Politician[]
+  Candidate    Candidate[]
+}
+
+model View {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+
+  name        String
+  description String
+
+  economics Int?
+  social    Int?
+  freedom   Int?
+
+  people        Person[]
+  organizations Organization[]
+  candidates    Candidate[]
+  politicians   Politician[]
+}
+
+model Person {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+
+  name     String
+  surname  String
+  email    String @unique
+  cpf      Int    @unique
+  password String
+
+  birthDate     DateTime?
+  sex           Sex?
+  gender        String?
+  economicClass EconomicClass?
+  skinColor     SkinColor?
+
+  voteState   State  @relation(fields: [voteStateId], references: [id])
+  voteStateId String
+
+  Contact Contact?
+  views   View[]
+
+  Politician Politician?
+  Candidate  Candidate?
+
+  Sentiment Sentiment[]
+}
+
+model Organization {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+
+  type           OrganizationType
+  cnpj           Int              @unique
+  name           String
+  logoUrl        String?
+  abbreviation   String?
+  email          String?
+  password       String?
+  mainColor      String?
+  secondaryColor String?
+  about          String?
+
+  contact Contact?
+  views   View[]
+
+  politicians   Politician[]
+  candidates    Candidate[]
+  voteGuidances VoteGuidance[]
+  news          News[]
+  newsOpinions  NewsOpinion[]
+  Source        Source?
+}
+
+model Contact {
+  id             String       @id @default(cuid())
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @default(now())
+  telephone      String?
+  email          String?
+  address        String?
+  twitter        String?
+  facebook       String?
+  instagram      String?
+  linkedin       String?
+  website        String
+  person         Person       @relation(fields: [personId], references: [id])
+  personId       String       @unique
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  organizationId String       @unique
+}
+
+model Candidate {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+
+  name        String
+  description String
+  person      Person       @relation(fields: [personId], references: [id])
+  personId    String       @unique
+  party       Organization @relation(fields: [partyId], references: [id])
+  partyId     String       @unique
+  state       State        @relation(fields: [stateId], references: [id])
+  stateId     String       @unique
+
+  views      View[]
+  sentiments Sentiment[]
+  news       News[]
+}
+
+model Politician {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+
+  name        String
+  description String
+  person      Person       @relation(fields: [personId], references: [id])
+  personId    String       @unique
+  party       Organization @relation(fields: [partyId], references: [id])
+  partyId     String       @unique
+  state       State        @relation(fields: [stateId], references: [id])
+  stateId     String       @unique
+
+  views    View[]
+  votes    Vote[]
+  news     News[]
+  mandates Mandate[]
+  scores   PeriodScore[]
+}
+
+model Theme {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+
+  name   String
+  scores PeriodScore[]
+}
+
+model PeriodScore {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+
+  startDate DateTime
+  endDate   DateTime
+
+  politician   Politician @relation(fields: [politicianId], references: [id])
+  politicianId String
+
+  theme   Theme  @relation(fields: [themeId], references: [id])
+  themeId String
+
+  value Int
+}
+
+model Mandate {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+
+  mandate     String
+  description String
+  startDate   DateTime
+  endDate     DateTime
+
+  politician   Politician @relation(fields: [politicianId], references: [id])
+  politicianId String     @unique
+
+  roles Role[]
+}
+
+model Role {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+
+  type      String
+  startDate DateTime
+  endDate   DateTime
+  mandate   Mandate  @relation(fields: [mandateId], references: [id])
+  mandateId String   @unique
+}
+
+model Sentiment {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+
+  name String
+
+  person   Person @relation(fields: [personId], references: [id])
+  personId String @unique
+
+  candidate   Candidate @relation(fields: [candidateId], references: [id])
+  candidateId String    @unique
+}
+
+model Voting {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+
+  name        String
+  title       String
+  description String
+
+  votes     Vote[]
+  guidances VoteGuidance[]
+}
+
+model Vote {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+
+  voting   Voting @relation(fields: [votingId], references: [id])
+  votingId String @unique
+
+  politician   Politician @relation(fields: [politicianId], references: [id])
+  politicianId String     @unique
+
+  vote VoteOptions
+}
+
+model VoteGuidance {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+
+  voting   Voting @relation(fields: [votingId], references: [id])
+  votingId String @unique
+
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  organizationId String       @unique
+
+  opinion String
+  vote    VoteGuidanceOptions
+  points  Int
+}
+
+model News {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+
+  title       String
+  description String
+  imageUrl    String?
+  date        DateTime
+
+  sources Source[]
+
+  candidates    Candidate[]
+  politicians   Politician[]
+  organizations Organization[]
+
+  opinions NewsOpinion[]
+}
+
+model Source {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  organizationId String       @unique
+
+  url  String
+  date DateTime
+
+  News   News?   @relation(fields: [newsId], references: [id])
+  newsId String?
+}
+
+model NewsOpinion {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+
+  news   News   @relation(fields: [newsId], references: [id])
+  newsId String @unique
+
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  organizationId String       @unique
+
+  opinion String
+  points  Int
+}
