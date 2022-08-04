@@ -1,4 +1,4 @@
-import repositories from "../repositories/index.js";
+import repositories from "./index.js";
 
 
 

@@ -1,7 +1,7 @@
 import Cryptr from "cryptr"
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import { AppError } from "../errors/AppError.js";
+import appError from "../errors/error.utils.js"
 
 const secretKey = process.env.JWT_SECRET ?? 'JWT_SECRET';
 const cryptrSecret = process.env.JWT_SECRET ?? 'JWT_SECRET';
@@ -29,7 +29,7 @@ function decodeToken (token: string) {
         const decoded = jwt.verify(token, secretKey);
         return decoded;
     } catch (e) {
-        throw new AppError(401, 'Invalid token');
+        throw appError.unauthorized("Invalid token");
     }
 }
 

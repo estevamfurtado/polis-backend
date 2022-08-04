@@ -14,43 +14,43 @@ generator dbml {
 // MODELS -----------------------------------------------------------------
 
 model State {
-  id           String       @id @default(cuid())
-  createdAt    DateTime     @default(now())
-  updatedAt    DateTime     @default(now())
-  name         String
-  abbreviation String
-  people       Person[]
-  politicians  Politician[]
-  candidates   Candidate[]
+  createdAt     DateTime              @default(now())
+  updatedAt     DateTime              @default(now())
+  name          String
+  abbreviation  String                @id @unique
+  people        Person[]
+  politicians   Politician[]
+  candidates    Candidate[]
+  RankingRecord PoliticianInRanking[]
 }
 
 model View {
-  id        String   @id @default(cuid())
+  id        Int      @id @default(autoincrement())
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now())
 
   name        String
   description String
 
-  economics Int?
-  social    Int?
-  freedom   Int?
+  economicFreedom  Int?
+  personalFreedom  Int?
+  politicalFreedom Int?
 
-  people        Person[]
-  organizations Organization[]
-  candidates    Candidate[]
-  politicians   Politician[]
+  people     Person[]
+  parties    PoliticalParty[]
+  candidates Candidate[]
 }
 
 model Person {
-  id        String   @id @default(cuid())
+  id        Int      @id @default(autoincrement())
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now())
 
   name     String
-  cpf      String @unique
-  phone    String
-  password String
+  cpf      String? @unique
+  password String?
+  phone    String?
+  email    String?
 
   birthDate     DateTime?
   sex           Sex?
@@ -58,28 +58,29 @@ model Person {
   economicClass EconomicClass?
   skinColor     SkinColor?
 
-  voteState   State  @relation(fields: [voteStateId], references: [id])
-  voteStateId String
+  voteState             State  @relation(fields: [voteStateAbbreviation], references: [abbreviation])
+  voteStateAbbreviation String
 
-  Contact Contact?
+  contact Contact?
 
   views      View[]
   sentiments Sentiment[]
 
   politicianProfile Politician?
   candidateProfile  Candidate?
+  Album             Album?      @relation(fields: [albumId], references: [id])
+  albumId           Int?
+  Deck              Deck[]
 }
 
-model Organization {
-  id        String   @id @default(cuid())
+model PoliticalParty {
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now())
 
-  type           OrganizationType
-  cnpj           String           @unique
+  cnpj           String  @unique
   name           String
   logoUrl        String?
-  abbreviation   String?
+  abbreviation   String  @id @unique
   email          String?
   password       String?
   mainColor      String?
@@ -89,264 +90,262 @@ model Organization {
   contact Contact?
   views   View[]
 
-  politicians       Politician[]
-  candidates        Candidate[]
-  voteGuidances     VoteGuidance[]
-  citedInNews       News[]
-  newsOpinions      NewsOpinion[]
-  sources           Source[]
-  themesEvaluations ThemesEvaluation[]
-  createdNews       News[]             @relation(name: "NewsCreatedByOrganization")
-}
+  politicians Politician[]
+  candidates  Candidate[]
 
-model ThemesEvaluation {
-  id        String   @id @default(cuid())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now())
-
-  name        String
-  description String
-
-  themesWeights ThemeWeight[]
-
-  organization   Organization @relation(fields: [organizationId], references: [id])
-  organizationId String
-}
-
-model ThemeWeight {
-  id        String   @id @default(cuid())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now())
-
-  evaluation   ThemesEvaluation @relation(fields: [evaluationId], references: [id])
-  evaluationId String
-
-  theme   Theme  @relation(fields: [themeId], references: [id])
-  themeId String
-
-  weight Int
+  rankingRecords PoliticianInRanking[]
 }
 
 model Contact {
-  id             String       @id @default(cuid())
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @default(now())
-  telephone      String?
-  email          String?
-  address        String?
-  twitter        String?
-  facebook       String?
-  instagram      String?
-  linkedin       String?
-  website        String
-  person         Person       @relation(fields: [personId], references: [id])
-  personId       String       @unique
-  organization   Organization @relation(fields: [organizationId], references: [id])
-  organizationId String       @unique
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+
+  phone     String?
+  email     String?
+  address   String?
+  twitter   String?
+  facebook  String?
+  instagram String?
+  linkedin  String?
+  youtube   String?
+  website   String?
+
+  person   Person? @relation(fields: [personId], references: [id])
+  personId Int?    @unique
+
+  party             PoliticalParty? @relation(fields: [partyAbbreviation], references: [abbreviation])
+  partyAbbreviation String?         @unique
 }
 
 model Candidate {
-  id        String   @id @default(cuid())
+  id        Int      @id @default(autoincrement())
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now())
 
   name        String
   description String
-  person      Person       @relation(fields: [personId], references: [id])
-  personId    String       @unique
-  party       Organization @relation(fields: [partyId], references: [id])
-  partyId     String       @unique
-  state       State        @relation(fields: [stateId], references: [id])
-  stateId     String       @unique
+  person      Person @relation(fields: [personId], references: [id])
+  personId    Int    @unique
+
+  party             PoliticalParty @relation(fields: [partyAbbreviation], references: [abbreviation])
+  partyAbbreviation String
+
+  state             State  @relation(fields: [stateAbbreviation], references: [abbreviation])
+  stateAbbreviation String
 
   views      View[]
   sentiments Sentiment[]
-  news       News[]
 }
 
 model Politician {
-  id        String   @id @default(cuid())
+  id        Int      @id @default(autoincrement())
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now())
 
   name        String
   description String
-  person      Person       @relation(fields: [personId], references: [id])
-  personId    String       @unique
-  party       Organization @relation(fields: [partyId], references: [id])
-  partyId     String       @unique
-  state       State        @relation(fields: [stateId], references: [id])
-  stateId     String       @unique
+  person      Person @relation(fields: [personId], references: [id])
+  personId    Int    @unique
+  officialId  String @unique
 
-  views    View[]
-  votes    Vote[]
-  news     News[]
-  mandates Mandate[]
-  scores   PeriodScore[]
-}
+  party             PoliticalParty @relation(fields: [partyAbbreviation], references: [abbreviation])
+  partyAbbreviation String
 
-model Theme {
-  id        String   @id @default(cuid())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now())
+  state             State  @relation(fields: [stateAbbreviation], references: [abbreviation])
+  stateAbbreviation String
 
-  name        String
-  scores      PeriodScore[]
-  ThemeWeight ThemeWeight[]
-}
-
-model PeriodScore {
-  id        String   @id @default(cuid())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now())
-
-  startDate DateTime
-  endDate   DateTime
-
-  politician   Politician @relation(fields: [politicianId], references: [id])
-  politicianId String
-
-  theme   Theme  @relation(fields: [themeId], references: [id])
-  themeId String
-
-  value Int
-}
-
-model Mandate {
-  id        String   @id @default(cuid())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now())
-
-  mandate     String
-  description String
-  startDate   DateTime
-  endDate     DateTime
-
-  politician   Politician @relation(fields: [politicianId], references: [id])
-  politicianId String     @unique
-
-  roles Role[]
-}
-
-model Role {
-  id        String   @id @default(cuid())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now())
-
-  type      String
-  startDate DateTime
-  endDate   DateTime
-  mandate   Mandate  @relation(fields: [mandateId], references: [id])
-  mandateId String   @unique
+  imageUrl String
+  rankings PoliticianInRanking[]
 }
 
 model Sentiment {
-  id        String   @id @default(cuid())
+  id        Int      @id @default(autoincrement())
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now())
 
   name String
 
   person   Person @relation(fields: [personId], references: [id])
-  personId String @unique
+  personId Int    @unique
 
   candidate   Candidate @relation(fields: [candidateId], references: [id])
-  candidateId String    @unique
+  candidateId Int       @unique
+
+  imageUrl String
 }
 
-model Voting {
-  id        String   @id @default(cuid())
+// year + title together should be unique
+model Ranking {
+  id        Int      @id @default(autoincrement())
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now())
 
-  name        String
+  year    Int
+  title   String
+  records PoliticianInRanking[]
+
+  @@unique([year, title])
+}
+
+model PoliticianInRanking {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+
+  politician   Politician? @relation(fields: [politicianId], references: [id])
+  politicianId Int?
+
+  sourceId   String?
+  sourceUrl  String?
+  sourceName String?
+
+  ranking   Ranking @relation(fields: [rankingId], references: [id])
+  rankingId Int
+
+  party             PoliticalParty? @relation(fields: [partyAbbreviation], references: [abbreviation])
+  partyAbbreviation String?
+
+  state             State  @relation(fields: [stateAbbreviation], references: [abbreviation])
+  stateAbbreviation String
+
+  candidateType String
+
+  quantityVote            Int
+  reelected               Boolean
+  cutAidShift             Boolean
+  isPresident             Boolean
+  cutHousingAllowance     Boolean
+  cutRetirement           Boolean
+  requestedFamilyPassport Boolean
+  quotaAmountSum          Int
+
+  scorePresence   Float
+  scoreSaveQuota  Float
+  scoreProcess    Float
+  scoreInternal   Float
+  scorePrivileges Float
+  scoreWastage    Float
+  scoreTotal      Float
+
+  scoreRanking           Float
+  scoreRankingByPosition Float
+  scoreRankingByParty    Float
+  scoreRankingByState    Float
+
+  scorePresenceFormula        String
+  scoreProcessFormula         String
+  scorePrivilegesFormula      String
+  scoreSaveQuotaFormula       String
+  scoreWastageFormula         String
+  scoreTotalFormula           String
+  parliamentarianCount        String
+  parliamentarianStateCount   String
+  parliamentarianStaffMaxYear String
+  parliamentarianQuotaMaxYear String
+
+  card CardModel?
+
+  @@unique([rankingId, politicianId])
+}
+
+model Album {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+
   title       String
+  year        Int
   description String
 
-  votes     Vote[]
-  guidances VoteGuidance[]
+  coverUrl String
+  thumbUrl String
+
+  pages AlbumPage[]
+
+  owners Person[]
+  Deck   Deck[]
+
+  @@unique([year, title])
 }
 
-model Vote {
-  id        String   @id @default(cuid())
+model AlbumPage {
+  id        Int      @id @default(autoincrement())
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now())
 
-  voting   Voting @relation(fields: [votingId], references: [id])
-  votingId String @unique
+  title           String
+  description     String
+  backgroundColor String?
 
-  politician   Politician @relation(fields: [politicianId], references: [id])
-  politicianId String     @unique
+  album   Album @relation(fields: [albumId], references: [id])
+  albumId Int
 
-  vote VoteOptions
+  stickers Sticker[]
+
+  @@unique([albumId, title])
 }
 
-model VoteGuidance {
-  id        String   @id @default(cuid())
+model Sticker {
+  id        Int      @id @default(autoincrement())
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now())
 
-  voting   Voting @relation(fields: [votingId], references: [id])
-  votingId String @unique
+  page   AlbumPage @relation(fields: [pageId], references: [id])
+  pageId Int
 
-  organization   Organization @relation(fields: [organizationId], references: [id])
-  organizationId String       @unique
+  card   CardModel @relation(fields: [cardId], references: [id])
+  cardId Int
 
-  opinion String
-  vote    VoteGuidanceOptions
-  points  Int
+  order      Int
+  identifier String
+
+  @@unique([pageId, identifier])
 }
 
-model News {
-  id        String   @id @default(cuid())
+model CardModel {
+  id        Int      @id @default(autoincrement())
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now())
 
-  title       String
-  description String
-  imageUrl    String?
-  date        DateTime
+  record   PoliticianInRanking? @relation(fields: [recordId], references: [id])
+  recordId Int?                 @unique
 
-  createdBy   Organization @relation(name: "NewsCreatedByOrganization", fields: [createdById], references: [id])
-  createdById String       @unique
+  variant  String @default("normal")
+  imageUrl String
 
-  sources Source[]
-
-  candidatesCited    Candidate[]
-  politiciansCited   Politician[]
-  organizationsCited Organization[]
-
-  opinions NewsOpinion[]
+  Sticker Sticker[]
+  Card    Card[]
 }
 
-model Source {
-  id        String   @id @default(cuid())
+model Card {
+  id        Int      @id @default(autoincrement())
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now())
 
-  organization   Organization @relation(fields: [organizationId], references: [id])
-  organizationId String       @unique
+  model   CardModel @relation(fields: [modelId], references: [id])
+  modelId Int
 
-  url  String
-  date DateTime
+  isPasted Boolean @default(false)
 
-  News   News?   @relation(fields: [newsId], references: [id])
-  newsId String?
+  Deck   Deck? @relation(fields: [deckId], references: [id])
+  deckId Int?
 }
 
-model NewsOpinion {
-  id        String   @id @default(cuid())
+model Deck {
+  id        Int      @id @default(autoincrement())
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now())
 
-  news   News   @relation(fields: [newsId], references: [id])
-  newsId String @unique
+  owner   Person @relation(fields: [ownerId], references: [id])
+  ownerId Int
 
-  organization   Organization @relation(fields: [organizationId], references: [id])
-  organizationId String       @unique
+  album   Album @relation(fields: [albumId], references: [id])
+  albumId Int
 
-  opinion String
-  points  Int
+  cards Card[]
+
+  @@unique([ownerId, albumId])
 }
 
 // ENUMS -----------------------------------------------------------------
@@ -383,11 +382,6 @@ enum VoteOptions {
   Yes
   No
   Absent
-}
-
-enum MandateOptions {
-  DeputadoFederal
-  Senador
 }
 
 enum VoteGuidanceOptions {

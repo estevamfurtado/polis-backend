@@ -3,62 +3,63 @@
 //// ------------------------------------------------------
 
 Table State {
-  id String [pk]
   createdAt DateTime [default: `now()`, not null]
   updatedAt DateTime [default: `now()`, not null]
   name String [not null]
-  abbreviation String [not null]
+  abbreviation String [pk, unique]
   people Person [not null]
   politicians Politician [not null]
   candidates Candidate [not null]
+  RankingRecord PoliticianInRanking [not null]
 }
 
 Table View {
-  id String [pk]
+  id Int [pk, increment]
   createdAt DateTime [default: `now()`, not null]
   updatedAt DateTime [default: `now()`, not null]
   name String [not null]
   description String [not null]
-  economics Int
-  social Int
-  freedom Int
+  economicFreedom Int
+  personalFreedom Int
+  politicalFreedom Int
   people Person [not null]
-  organizations Organization [not null]
+  parties PoliticalParty [not null]
   candidates Candidate [not null]
-  politicians Politician [not null]
 }
 
 Table Person {
-  id String [pk]
+  id Int [pk, increment]
   createdAt DateTime [default: `now()`, not null]
   updatedAt DateTime [default: `now()`, not null]
   name String [not null]
-  cpf Int [unique, not null]
-  phone String [not null]
-  password String [not null]
+  cpf String [unique]
+  password String
+  phone String
+  email String
   birthDate DateTime
   sex Sex
   gender String
   economicClass EconomicClass
   skinColor SkinColor
   voteState State [not null]
-  voteStateId String [not null]
-  Contact Contact
+  voteStateAbbreviation String [not null]
+  contact Contact
   views View [not null]
   sentiments Sentiment [not null]
   politicianProfile Politician
   candidateProfile Candidate
+  Album Album
+  albumId Int
+  Deck Deck [not null]
 }
 
-Table Organization {
-  id String [pk]
+Table PoliticalParty {
   createdAt DateTime [default: `now()`, not null]
   updatedAt DateTime [default: `now()`, not null]
-  type OrganizationType [not null]
-  cnpj Int [unique, not null]
+  cnpj String [unique, not null]
   name String [not null]
   logoUrl String
-  abbreviation String
+  abbreviation String [pk, unique]
   email String
   password String
   mainColor String
@@ -68,256 +69,239 @@ Table Organization {
   views View [not null]
   politicians Politician [not null]
   candidates Candidate [not null]
-  voteGuidances VoteGuidance [not null]
-  citedInNews News [not null]
-  newsOpinions NewsOpinion [not null]
-  sources Source [not null]
-  themesEvaluations ThemesEvaluation [not null]
-  createdNews News [not null]
-}
-
-Table ThemesEvaluation {
-  id String [pk]
-  createdAt DateTime [default: `now()`, not null]
-  updatedAt DateTime [default: `now()`, not null]
-  name String [not null]
-  description String [not null]
-  themesWeights ThemeWeight [not null]
-  organization Organization [not null]
-  organizationId String [not null]
-}
-
-Table ThemeWeight {
-  id String [pk]
-  createdAt DateTime [default: `now()`, not null]
-  updatedAt DateTime [default: `now()`, not null]
-  evaluation ThemesEvaluation [not null]
-  evaluationId String [not null]
-  theme Theme [not null]
-  themeId String [not null]
-  weight Int [not null]
+  rankingRecords PoliticianInRanking [not null]
 }
 
 Table Contact {
-  id String [pk]
+  id Int [pk, increment]
   createdAt DateTime [default: `now()`, not null]
   updatedAt DateTime [default: `now()`, not null]
-  telephone String
+  phone String
   email String
   address String
   twitter String
   facebook String
   instagram String
   linkedin String
-  website String [not null]
-  person Person [not null]
-  personId String [unique, not null]
-  organization Organization [not null]
-  organizationId String [unique, not null]
+  youtube String
+  website String
+  person Person
+  personId Int [unique]
+  party PoliticalParty
+  partyAbbreviation String [unique]
 }
 
 Table Candidate {
-  id String [pk]
+  id Int [pk, increment]
   createdAt DateTime [default: `now()`, not null]
   updatedAt DateTime [default: `now()`, not null]
   name String [not null]
   description String [not null]
   person Person [not null]
-  personId String [unique, not null]
-  party Organization [not null]
-  partyId String [unique, not null]
+  personId Int [unique, not null]
+  party PoliticalParty [not null]
+  partyAbbreviation String [not null]
   state State [not null]
-  stateId String [unique, not null]
+  stateAbbreviation String [not null]
   views View [not null]
   sentiments Sentiment [not null]
-  news News [not null]
 }
 
 Table Politician {
-  id String [pk]
+  id Int [pk, increment]
   createdAt DateTime [default: `now()`, not null]
   updatedAt DateTime [default: `now()`, not null]
   name String [not null]
   description String [not null]
   person Person [not null]
-  personId String [unique, not null]
-  party Organization [not null]
-  partyId String [unique, not null]
+  personId Int [unique, not null]
+  officialId String [unique, not null]
+  party PoliticalParty [not null]
+  partyAbbreviation String [not null]
   state State [not null]
-  stateId String [unique, not null]
-  views View [not null]
-  votes Vote [not null]
-  news News [not null]
-  mandates Mandate [not null]
-  scores PeriodScore [not null]
-}
-
-Table Theme {
-  id String [pk]
-  createdAt DateTime [default: `now()`, not null]
-  updatedAt DateTime [default: `now()`, not null]
-  name String [not null]
-  scores PeriodScore [not null]
-  ThemeWeight ThemeWeight [not null]
-}
-
-Table PeriodScore {
-  id String [pk]
-  createdAt DateTime [default: `now()`, not null]
-  updatedAt DateTime [default: `now()`, not null]
-  startDate DateTime [not null]
-  endDate DateTime [not null]
-  politician Politician [not null]
-  politicianId String [not null]
-  theme Theme [not null]
-  themeId String [not null]
-  value Int [not null]
-}
-
-Table Mandate {
-  id String [pk]
-  createdAt DateTime [default: `now()`, not null]
-  updatedAt DateTime [default: `now()`, not null]
-  mandate String [not null]
-  description String [not null]
-  startDate DateTime [not null]
-  endDate DateTime [not null]
-  politician Politician [not null]
-  politicianId String [unique, not null]
-  roles Role [not null]
-}
-
-Table Role {
-  id String [pk]
-  createdAt DateTime [default: `now()`, not null]
-  updatedAt DateTime [default: `now()`, not null]
-  type String [not null]
-  startDate DateTime [not null]
-  endDate DateTime [not null]
-  mandate Mandate [not null]
-  mandateId String [unique, not null]
+  stateAbbreviation String [not null]
+  imageUrl String [not null]
+  rankings PoliticianInRanking [not null]
 }
 
 Table Sentiment {
-  id String [pk]
+  id Int [pk, increment]
   createdAt DateTime [default: `now()`, not null]
   updatedAt DateTime [default: `now()`, not null]
   name String [not null]
   person Person [not null]
-  personId String [unique, not null]
+  personId Int [unique, not null]
   candidate Candidate [not null]
-  candidateId String [unique, not null]
+  candidateId Int [unique, not null]
+  imageUrl String [not null]
 }
 
-Table Voting {
-  id String [pk]
+Table Ranking {
+  id Int [pk, increment]
   createdAt DateTime [default: `now()`, not null]
   updatedAt DateTime [default: `now()`, not null]
-  name String [not null]
+  year Int [not null]
+  title String [not null]
+  records PoliticianInRanking [not null]
+
+  indexes {
+    (year, title) [unique]
+  }
+}
+
+Table PoliticianInRanking {
+  id Int [pk, increment]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [default: `now()`, not null]
+  politician Politician
+  politicianId Int
+  sourceId String
+  sourceUrl String
+  sourceName String
+  ranking Ranking [not null]
+  rankingId Int [not null]
+  party PoliticalParty
+  partyAbbreviation String
+  state State [not null]
+  stateAbbreviation String [not null]
+  candidateType String [not null]
+  quantityVote Int [not null]
+  reelected Boolean [not null]
+  cutAidShift Boolean [not null]
+  isPresident Boolean [not null]
+  cutHousingAllowance Boolean [not null]
+  cutRetirement Boolean [not null]
+  requestedFamilyPassport Boolean [not null]
+  quotaAmountSum Int [not null]
+  scorePresence Float [not null]
+  scoreSaveQuota Float [not null]
+  scoreProcess Float [not null]
+  scoreInternal Float [not null]
+  scorePrivileges Float [not null]
+  scoreWastage Float [not null]
+  scoreTotal Float [not null]
+  scoreRanking Float [not null]
+  scoreRankingByPosition Float [not null]
+  scoreRankingByParty Float [not null]
+  scoreRankingByState Float [not null]
+  scorePresenceFormula String [not null]
+  scoreProcessFormula String [not null]
+  scorePrivilegesFormula String [not null]
+  scoreSaveQuotaFormula String [not null]
+  scoreWastageFormula String [not null]
+  scoreTotalFormula String [not null]
+  parliamentarianCount String [not null]
+  parliamentarianStateCount String [not null]
+  parliamentarianStaffMaxYear String [not null]
+  parliamentarianQuotaMaxYear String [not null]
+  card CardModel
+
+  indexes {
+    (rankingId, politicianId) [unique]
+  }
+}
+
+Table Album {
+  id Int [pk, increment]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [default: `now()`, not null]
+  title String [not null]
+  year Int [not null]
+  description String [not null]
+  coverUrl String [not null]
+  thumbUrl String [not null]
+  pages AlbumPage [not null]
+  owners Person [not null]
+  Deck Deck [not null]
+
+  indexes {
+    (year, title) [unique]
+  }
+}
+
+Table AlbumPage {
+  id Int [pk, increment]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [default: `now()`, not null]
   title String [not null]
   description String [not null]
-  votes Vote [not null]
-  guidances VoteGuidance [not null]
+  backgroundColor String
+  album Album [not null]
+  albumId Int [not null]
+  stickers Sticker [not null]
+
+  indexes {
+    (albumId, title) [unique]
+  }
 }
 
-Table Vote {
-  id String [pk]
+Table Sticker {
+  id Int [pk, increment]
   createdAt DateTime [default: `now()`, not null]
   updatedAt DateTime [default: `now()`, not null]
-  voting Voting [not null]
-  votingId String [unique, not null]
-  politician Politician [not null]
-  politicianId String [unique, not null]
-  vote VoteOptions [not null]
+  page AlbumPage [not null]
+  pageId Int [not null]
+  card CardModel [not null]
+  cardId Int [not null]
+  order Int [not null]
+  identifier String [not null]
+
+  indexes {
+    (pageId, identifier) [unique]
+  }
 }
 
-Table VoteGuidance {
-  id String [pk]
+Table CardModel {
+  id Int [pk, increment]
   createdAt DateTime [default: `now()`, not null]
   updatedAt DateTime [default: `now()`, not null]
-  voting Voting [not null]
-  votingId String [unique, not null]
-  organization Organization [not null]
-  organizationId String [unique, not null]
-  opinion String [not null]
-  vote VoteGuidanceOptions [not null]
-  points Int [not null]
+  record PoliticianInRanking
+  recordId Int [unique]
+  variant String [not null, default: 'normal']
+  imageUrl String [not null]
+  Sticker Sticker [not null]
+  Card Card [not null]
 }
 
-Table News {
-  id String [pk]
+Table Card {
+  id Int [pk, increment]
   createdAt DateTime [default: `now()`, not null]
   updatedAt DateTime [default: `now()`, not null]
-  title String [not null]
-  description String [not null]
-  imageUrl String
-  date DateTime [not null]
-  createdBy Organization [not null]
-  createdById String [unique, not null]
-  sources Source [not null]
-  candidatesCited Candidate [not null]
-  politiciansCited Politician [not null]
-  organizationsCited Organization [not null]
-  opinions NewsOpinion [not null]
+  model CardModel [not null]
+  modelId Int [not null]
+  isPasted Boolean [not null, default: false]
+  Deck Deck
+  deckId Int
 }
 
-Table Source {
-  id String [pk]
+Table Deck {
+  id Int [pk, increment]
   createdAt DateTime [default: `now()`, not null]
   updatedAt DateTime [default: `now()`, not null]
-  organization Organization [not null]
-  organizationId String [unique, not null]
-  url String [not null]
-  date DateTime [not null]
-  News News
-  newsId String
-}
+  owner Person [not null]
+  ownerId Int [not null]
+  album Album [not null]
+  albumId Int [not null]
+  cards Card [not null]
 
-Table NewsOpinion {
-  id String [pk]
-  createdAt DateTime [default: `now()`, not null]
-  updatedAt DateTime [default: `now()`, not null]
-  news News [not null]
-  newsId String [unique, not null]
-  organization Organization [not null]
-  organizationId String [unique, not null]
-  opinion String [not null]
-  points Int [not null]
+  indexes {
+    (ownerId, albumId) [unique]
+  }
 }
 
 Table PersonToView {
-  peopleId String [ref: > Person.id]
-  viewsId String [ref: > View.id]
+  peopleId Int [ref: > Person.id]
+  viewsId Int [ref: > View.id]
 }
 
-Table OrganizationToView {
-  organizationsId String [ref: > Organization.id]
-  viewsId String [ref: > View.id]
+Table PoliticalPartyToView {
+  partiesId String [ref: > PoliticalParty.abbreviation]
+  viewsId Int [ref: > View.id]
 }
 
 Table CandidateToView {
-  candidatesId String [ref: > Candidate.id]
-  viewsId String [ref: > View.id]
-}
-
-Table PoliticianToView {
-  politiciansId String [ref: > Politician.id]
-  viewsId String [ref: > View.id]
-}
-
-Table NewsToOrganization {
-  citedinnewsId String [ref: > News.id]
-  organizationscitedId String [ref: > Organization.id]
-}
-
-Table CandidateToNews {
-  newsId String [ref: > News.id]
-  candidatescitedId String [ref: > Candidate.id]
-}
-
-Table NewsToPolitician {
-  newsId String [ref: > News.id]
-  politicianscitedId String [ref: > Politician.id]
+  candidatesId Int [ref: > Candidate.id]
+  viewsId Int [ref: > View.id]
 }
 
 Enum EconomicClass {
@@ -354,67 +338,56 @@ Enum VoteOptions {
   Absent
 }
 
-Enum MandateOptions {
-  DeputadoFederal
-  Senador
-}
-
 Enum VoteGuidanceOptions {
   Yes
   No
   Any
 }
 
-Ref: Person.voteStateId > State.id
+Ref: Person.voteStateAbbreviation > State.abbreviation
 
-Ref: ThemesEvaluation.organizationId > Organization.id
-
-Ref: ThemeWeight.evaluationId > ThemesEvaluation.id
-
-Ref: ThemeWeight.themeId > Theme.id
+Ref: Person.albumId > Album.id
 
 Ref: Contact.personId - Person.id
 
-Ref: Contact.organizationId - Organization.id
+Ref: Contact.partyAbbreviation - PoliticalParty.abbreviation
 
 Ref: Candidate.personId - Person.id
 
-Ref: Candidate.partyId > Organization.id
+Ref: Candidate.partyAbbreviation > PoliticalParty.abbreviation
 
-Ref: Candidate.stateId > State.id
+Ref: Candidate.stateAbbreviation > State.abbreviation
 
 Ref: Politician.personId - Person.id
 
-Ref: Politician.partyId > Organization.id
+Ref: Politician.partyAbbreviation > PoliticalParty.abbreviation
 
-Ref: Politician.stateId > State.id
-
-Ref: PeriodScore.politicianId > Politician.id
-
-Ref: PeriodScore.themeId > Theme.id
-
-Ref: Mandate.politicianId > Politician.id
-
-Ref: Role.mandateId > Mandate.id
+Ref: Politician.stateAbbreviation > State.abbreviation
 
 Ref: Sentiment.personId > Person.id
 
 Ref: Sentiment.candidateId > Candidate.id
 
-Ref: Vote.votingId > Voting.id
+Ref: PoliticianInRanking.politicianId > Politician.id
 
-Ref: Vote.politicianId > Politician.id
+Ref: PoliticianInRanking.rankingId > Ranking.id
 
-Ref: VoteGuidance.votingId > Voting.id
+Ref: PoliticianInRanking.partyAbbreviation > PoliticalParty.abbreviation
 
-Ref: VoteGuidance.organizationId > Organization.id
+Ref: PoliticianInRanking.stateAbbreviation > State.abbreviation
 
-Ref: News.createdById > Organization.id
+Ref: AlbumPage.albumId > Album.id
 
-Ref: Source.organizationId > Organization.id
+Ref: Sticker.pageId > AlbumPage.id
 
-Ref: Source.newsId > News.id
+Ref: Sticker.cardId > CardModel.id
 
-Ref: NewsOpinion.newsId > News.id
+Ref: CardModel.recordId - PoliticianInRanking.id
 
-Ref: NewsOpinion.organizationId > Organization.id
+Ref: Card.modelId > CardModel.id
+
+Ref: Card.deckId > Deck.id
+
+Ref: Deck.ownerId > Person.id
+
+Ref: Deck.albumId > Album.id

@@ -9,7 +9,10 @@
     "test:unit": "NODE_OPTIONS=--experimental-vm-modules dotenv -e .env.test jest -- -i --coverage --testPathPattern=tests/unit",
     "test:integration": "NODE_OPTIONS=--experimental-vm-modules dotenv -e .env.test jest -- -i --coverage --testPathPattern=tests/integration",
     "dev": "nodemon src/server.ts",
-    "dev:test": "dotenv -e .env.test nodemon src/server.ts"
+    "dev:test": "dotenv -e .env.test nodemon src/server.ts",
+    "utils:camara": "nodemon prisma/seed.data/web.get/camara.ts",
+    "utils:ranking": "nodemon prisma/seed.data/web.get/ranking.ts",
+    "utils:process": "nodemon prisma/seed.data/web.get/process.ts"
   },
   "keywords": [],
   "author": "",
@@ -36,11 +39,15 @@
   },
   "dependencies": {
     "@prisma/client": "^3.13.0",
+    "axios": "^0.27.2",
+    "bcrypt": "^5.0.1",
     "cors": "^2.8.5",
+    "cryptr": "^6.0.3",
     "dotenv": "^10.0.0",
     "express": "^4.17.1",
     "express-async-errors": "^3.1.1",
     "joi": "^17.4.1",
+    "jsonwebtoken": "^8.5.1",
     "react-player": "^2.10.0"
   },
   "prisma": {
