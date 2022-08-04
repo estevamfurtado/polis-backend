@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { Prisma, Sex } from '@prisma/client';
 import parsers from '../../../src/utils/parsers';
-import paths from '../data.files/index.js';
+import paths from '../files/index.js';
 
 
 async function saveDeputadosData() {

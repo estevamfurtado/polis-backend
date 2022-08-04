@@ -6,7 +6,7 @@ const __dirname = path.dirname(__filename);
 
 const json = {
     errors: {
-        seedDeputados: path.resolve(__dirname, './json/erros/seed_deputados.json'),
+        seedDeputados: path.resolve(__dirname, './json/errors/seed_deputados.json'),
     },
     raw: {
         deputados: path.resolve(__dirname, './json/raw/deputados.json'),
@@ -14,9 +14,10 @@ const json = {
     },
     seed: {
         deputados: path.resolve(__dirname, './json/seed/deputados.json'),
-        rankings: path.resolve(__dirname, './json/seed/ranking.json'),
+        rankings: path.resolve(__dirname, './json/seed/rankings.json'),
         states: path.resolve(__dirname, './json/seed/states.json'),
         parties: path.resolve(__dirname, './json/seed/parties.json'),
+        rankingRecords: path.resolve(__dirname, './json/seed/records.json'),
     }
 }
 const csv = {

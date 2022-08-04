@@ -1,23 +1,31 @@
 import Prisma from '@prisma/client';
-import states from './seed.data/get/states.js';
-import politicalParties from './seed.data/get/parties.js';
-import deputados from './seed.data/get/deputados.js';
 import parser from '../src/utils/parsers/index.js';
-import paths from './seed.data/data.files/index.js';
+import paths from './seed/files/index.js';
+import data from './seed/data/index.js';
+
+const {deputados, states, parties, rankings} = data;
 
 const prisma = new Prisma.PrismaClient();
 
 
 async function main() {
     console.log('Seeding database...');
+    
     console.log('>> Creating States...');
     await prisma.state.createMany({data: states});
+    
     console.log('>> Creating Parties...');
-    await prisma.politicalParty.createMany({data: politicalParties});
+    await prisma.politicalParty.createMany({data: parties});
+    
     console.log('>> Creating Politicians...');
     await addDeputadosToDatabase();
+
+    console.log('>> Creating Rankings...');
+    await prisma.ranking.createMany({data: rankings});
+    
     console.log('Seeding database... done!');
 }
+
 
 async function addDeputadosToDatabase() {
     let i = 0;
@@ -45,8 +53,6 @@ async function addDeputadoToDatabase(deputado: Prisma.Prisma.PersonCreateInput, 
     }
 }
 
-
-// -----
 
 main()
 .catch(console.error)

@@ -10,9 +10,9 @@
     "test:integration": "NODE_OPTIONS=--experimental-vm-modules dotenv -e .env.test jest -- -i --coverage --testPathPattern=tests/integration",
     "dev": "nodemon src/server.ts",
     "dev:test": "dotenv -e .env.test nodemon src/server.ts",
-    "utils:camara": "nodemon prisma/seed.data/web.get/camara.ts",
-    "utils:ranking": "nodemon prisma/seed.data/web.get/ranking.ts",
-    "utils:process": "nodemon prisma/seed.data/web.get/process.ts"
+    "utils:camara": "nodemon prisma/seed/get/camara.ts",
+    "utils:ranking": "nodemon prisma/seed/get/ranking.ts",
+    "utils:process": "nodemon prisma/seed/web/process.ts"
   },
   "keywords": [],
   "author": "",

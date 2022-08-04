@@ -1,5 +1,5 @@
 import parsers from '../../../src/utils/parsers/index.js';
-import paths from '../data.files/index.js';
+import paths from '../files/index.js';
 
 const fromTo = {
     parties: {

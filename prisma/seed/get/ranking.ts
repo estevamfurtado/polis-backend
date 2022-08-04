@@ -3,7 +3,7 @@ import axios from 'axios';
 
 import { Prisma } from '@prisma/client';
 
-import paths from '../data.files/index.js';
+import paths from '../files/index.js';
 
 async function saveDeputadosData() {
     const deputados = await getDeputadosFromAPI();
