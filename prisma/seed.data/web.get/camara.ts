@@ -1,20 +1,14 @@
 import axios from 'axios';
 import { Prisma, Sex } from '@prisma/client';
 import parsers from '../../../src/utils/parsers';
-import path from 'path';
-import { fileURLToPath } from 'url';
+import paths from '../data.files/index.js';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const paths = {
-    deputadosRaw: path.resolve(__dirname, '../data.files/json/deputados_raw.json')
-}
 
 async function saveDeputadosData() {
     const deputados = await getDeputadosFromAPI();
     const deputadosWithData = await getEachDeputadoFromAPI(deputados);
 
-    parsers.json.write(deputadosWithData, paths.deputadosRaw);
+    parsers.json.write(deputadosWithData, paths.json.raw.deputados);
 }
 
 async function getDeputadosFromAPI() {
@@ -66,7 +60,7 @@ async function getEachDeputadoFromAPI(deputados: any[]) {
 
 
 async function saveDeputadosAsPeople() {
-    const deputadosRaw = parsers.json.read(paths.deputadosRaw) as {
+    const deputadosRaw = parsers.json.read(paths.json.raw.deputados) as {
         date: string,
         data: RawDeputado[]
     };
@@ -127,7 +121,7 @@ function fabricatePoliticalPerson(deputado: RawDeputado, index: number) : Prisma
 
 function listAllPartiesAbbreviations () {
 
-    const deputadosRaw = parsers.json.read(paths.deputadosRaw) as {
+    const deputadosRaw = parsers.json.read(paths.json.raw.deputados) as {
         date: string,
         data: RawDeputado[]
     };
@@ -139,11 +133,11 @@ function listAllPartiesAbbreviations () {
             parties.push(deputado.siglaPartido);
         }
     }
-    parsers.json.write(parties, paths.deputadosRaw);
+    parsers.json.write(parties, paths.json.raw.deputados);
 }
 
 function listAllStatesAbbreviations () {
-    const deputadosRaw = parsers.json.read(paths.deputadosRaw) as {
+    const deputadosRaw = parsers.json.read(paths.json.raw.deputados) as {
         date: string,
         data: RawDeputado[]
     };
@@ -172,7 +166,7 @@ function listAllStatesAbbreviations () {
             states.push(sigla);
         }
     }
-    parsers.json.write(states, paths.deputadosRaw);
+    parsers.json.write(states, paths.json.raw.deputados);
 }
 
 

@@ -3,19 +3,11 @@ import axios from 'axios';
 
 import { Prisma } from '@prisma/client';
 
-import path from 'path';
-import { fileURLToPath } from 'url';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const paths = {
-    rankingRaw: path.resolve(__dirname, '../data.files/json/ranking_raw.json'),
-}
-
+import paths from '../data.files/index.js';
 
 async function saveDeputadosData() {
     const deputados = await getDeputadosFromAPI();
-    parsers.json.write(deputados, paths.rankingRaw);
+    parsers.json.write(deputados, paths.json.raw.rankings);
 }
 
 async function getDeputadosFromAPI() {
@@ -23,8 +15,6 @@ async function getDeputadosFromAPI() {
     let response = await axios.get(url);
     return response.data.data as RawDeputadoFromRankingDosPoliticos[];
 }
-
-function saveRankings() {}
 
 
 

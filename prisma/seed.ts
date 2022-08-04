@@ -1,19 +1,11 @@
 import Prisma from '@prisma/client';
-import states from './seed.data/states.js';
-import politicalParties from './seed.data/parties.js';
-import deputadosDados from './seed.data/deputados.js';
+import states from './seed.data/get/states.js';
+import politicalParties from './seed.data/get/parties.js';
+import deputados from './seed.data/get/deputados.js';
 import parser from '../src/utils/parsers/index.js';
-
-import path from 'path';
-import { fileURLToPath } from 'url';
+import paths from './seed.data/data.files/index.js';
 
 const prisma = new Prisma.PrismaClient();
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const paths = {
-    deputadosSeedErrors: path.resolve(__dirname, './seed.data/data.files/json/deputados_seed_errors.json')
-}
 
 
 async function main() {
@@ -28,7 +20,6 @@ async function main() {
 }
 
 async function addDeputadosToDatabase() {
-    const deputados = deputadosDados.data;
     let i = 0;
     const errors = {};
     for (const deputado of deputados) {
@@ -42,7 +33,7 @@ async function addDeputadosToDatabase() {
         }
         i++;
     }
-    parser.json.write(errors, paths.deputadosSeedErrors);
+    parser.json.write(errors, paths.json.errors.seedDeputados);
 }
 
 async function addDeputadoToDatabase(deputado: Prisma.Prisma.PersonCreateInput, i: number) {

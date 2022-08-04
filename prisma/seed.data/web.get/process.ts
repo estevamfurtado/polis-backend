@@ -1,18 +1,14 @@
 import parsers from '../../../src/utils/parsers/index.js';
-import path from 'path';
-import { fileURLToPath } from 'url';
+import paths from '../data.files/index.js';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-const paths = {
+const fromTo = {
     parties: {
-        from: path.resolve(__dirname, '../data.files/csv/politicalParties.csv'),
-        to: path.resolve(__dirname, '../data.files/json/parties_seed.json') 
+        from: paths.csv.raw.parties,
+        to: paths.json.seed.parties
     },
     states: {
-        from: path.resolve(__dirname, '../data.files/csv/states.csv'),
-        to: path.resolve(__dirname, '../data.files/json/states_seed.json')
+        from: paths.csv.raw.states,
+        to: paths.json.seed.states
     }
 }
 
@@ -23,4 +19,4 @@ function transformCsvsToJson(paths: any) {
     const dados = parsers.json.read(paths.to);
 }
 
-// transformCsvsToJson(paths.parties);
+// transformCsvsToJson(fromTo);

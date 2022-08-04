@@ -175,7 +175,6 @@ model Sentiment {
   imageUrl String
 }
 
-// year + title together should be unique
 model Ranking {
   id        Int      @id @default(autoincrement())
   createdAt DateTime @default(now())
