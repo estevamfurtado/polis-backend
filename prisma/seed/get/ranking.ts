@@ -1,9 +1,8 @@
 import parsers from '../../../src/utils/parsers/index.js';
 import axios from 'axios';
+import Prisma from '@prisma/client';
 
-import { Prisma } from '@prisma/client';
-
-import paths from '../files/index.js';
+import paths from '../files/paths.js';
 
 async function saveDeputadosData() {
     const deputados = await getDeputadosFromAPI();
@@ -16,6 +15,173 @@ async function getDeputadosFromAPI() {
     return response.data.data as RawDeputadoFromRankingDosPoliticos[];
 }
 
+async function readRanking() {
+    console.log('Reading ranking data...');
+    const data = parsers.json.read(paths.json.raw.rankings) as {
+        date: string,
+        data: RawDeputadoFromRankingDosPoliticos[]
+    };
+    const deputados = data.data;
+
+    console.log('Getting politicians from db...');
+    const politiciansInDb = await getPoliticiansWithCPFFromDatabase();
+
+    console.log('Processing ranking data...');
+    const records = processRanking(deputados, politiciansInDb);
+
+    console.log('Saving ranking seed data...');
+    parsers.json.write(records, paths.json.seed.rankingRecords);
+
+    console.log('Seed data saved!');
+}
+
+async function getPoliticiansWithCPFFromDatabase() {
+    const db = new Prisma.PrismaClient();
+    const politicians = await db.politician.findMany({include: {person: {select: {cpf: true}}}});
+    return politicians;
+}
+
+function processRanking(politicians: RawDeputadoFromRankingDosPoliticos[], politiciansInDb: (Prisma.Politician & {person: {cpf: string}})[]) : Prisma.Prisma.PoliticianInRankingCreateInput[] {
+    
+    console.log(`# deputados: ${politicians.length}`)
+    console.log(`# politicians in db: ${politiciansInDb.length}`)
+
+    const records = [];
+
+    let cpfs = 0;
+    let cpfsFound = 0;
+    let allRecords = 0;
+    let recordsSaved = 0;
+
+    const cpfHt = {};
+    const idHt = {};
+
+    politicians.forEach(p => {
+
+        const searchCPF = p.parliamentarian?.cpf?.replace(/[^0-9]/g, '') || null; 
+        allRecords += p.parliamentarian.ranking.length;
+
+        if (searchCPF && !cpfHt[searchCPF]) {
+            
+            cpfHt[searchCPF] = true;
+            cpfs++;
+
+            const politicianInDb = politiciansInDb.find(pol => pol.person.cpf === searchCPF) || null;
+            const politicianId = politicianInDb?.id || null;
+
+            if (politicianId && !idHt[politicianId]) {
+
+                idHt[politicianId] = true;
+
+                cpfsFound++;
+                const politician = {connect: {id: politicianId}};
+                console.log(`${cpfsFound} - ${politicianId}`);
+
+                const politicianData = createPoliticianData(p);
+
+                p.parliamentarian.ranking.forEach(r => {
+                    if (r.year > 0) {
+                        const recordData = createRecordData(r);
+                        const record = {
+                            politician,
+                            ...politicianData,
+                            ...recordData
+                        } as Prisma.Prisma.PoliticianInRankingCreateInput;
+        
+                        records.push(record);
+                        recordsSaved++;
+                    }
+                })
+            }
+        }
+        
+    })
+
+    console.log(`# cpfs: ${cpfs}`)
+    console.log(`# cpfs found: ${cpfsFound}`)
+    console.log(`# all records: ${allRecords}`)
+    console.log(`# records saved: ${recordsSaved}`)
+
+    return records;
+}
+
+function createPoliticianData(p: any) {
+
+    const source = {
+        sourceId: `${p.parliamentarian.id}`,
+        sourceUrl: `https://www.politicos.org.br/Parlamentar/${p.parliamentarian.id}`,
+        sourceName: 'Ranking dos Políticos'
+    }
+    
+    const party = {connect: {abbreviation: p.parliamentarian.party.prefix}} as Prisma.Prisma.PoliticalPartyCreateNestedOneWithoutRankingRecordsInput;
+    const state = {connect: {abbreviation: p.parliamentarian.state.prefix}} as Prisma.Prisma.StateCreateNestedOneWithoutRankingRecordInput;
+    const info = {
+        party,
+        state,
+        candidateType: p.parliamentarian.position,
+        quantityVote: Number(String(p.parliamentarian.quantityVote).replace(/[^0-9]/g, '')),
+        quotaAmountSum: p.parliamentarian.quotaAmountSum,
+    }
+
+    const booleans = {
+        reelected: p.parliamentarian.reelected,
+        cutAidShift: p.parliamentarian.cutAidShift,
+        isPresident: p.parliamentarian.isPresident,
+        cutHousingAllowance: p.parliamentarian.cutHousingAllowance,
+        cutRetirement: p.parliamentarian.cutRetirement,
+        requestedFamilyPassport: p.parliamentarian.requestedFamilyPassport,
+    }
+
+    return {
+        ...source,
+        ...info,
+        ...booleans,
+    }
+}
+
+function createRecordData (r: any) {
+    const ranking = {connect: {year_title: {year: r.year, title: 'Ranking dos Políticos'}}} as Prisma.Prisma.RankingCreateNestedOneWithoutRecordsInput;
+
+    const scores = {
+        scorePresence: r.scorePresence,
+        scoreSaveQuota: r.scoreSaveQuota,
+        scoreProcess: r.scoreProcess,
+        scoreInternal: r.scoreInternal,
+        scorePrivileges: r.scorePrivileges,
+        scoreWastage: r.scoreWastage,
+        scoreTotal: r.scoreTotal,
+        scoreRanking: r.scoreRanking,
+        scoreRankingByPosition: r.scoreRankingByPosition,
+        scoreRankingByParty: r.scoreRankingByParty,
+        scoreRankingByState: r.scoreRankingByState,
+    }
+
+    const formulas = {
+        scorePresenceFormula: r.scorePresenceFormula,
+        scoreProcessFormula: r.scoreProcessFormula,
+        scorePrivilegesFormula: r.scorePrivilegesFormula,
+        scoreSaveQuotaFormula: r.scoreSaveQuotaFormula,
+        scoreWastageFormula: r.scoreWastageFormula,
+        scoreTotalFormula: r.scoreTotalFormula,
+    }
+
+    const counters = {
+        parliamentarianCount: r.parliamentarianCount,
+        parliamentarianStateCount: r.parliamentarianStateCount,
+        parliamentarianStaffMaxYear: r.parliamentarianStaffMaxYear,
+        parliamentarianQuotaMaxYear: r.parliamentarianQuotaMaxYear,
+    }
+
+    return {
+        ranking,
+        ...scores,
+        ...formulas,
+        ...counters,
+    }
+}
+
+
+readRanking();
 
 
 interface RawDeputadoFromRankingDosPoliticos {

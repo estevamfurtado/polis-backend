@@ -1,5 +1,5 @@
 import parsers from '../../../src/utils/parsers/index.js';
-import paths from '../files/index.js';
+import paths from '../files/paths.js';
 
 const fromTo = {
     parties: {
@@ -19,4 +19,3 @@ function transformCsvsToJson(paths: any) {
     const dados = parsers.json.read(paths.to);
 }
 
-// transformCsvsToJson(fromTo);

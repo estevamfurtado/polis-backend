@@ -24,23 +24,6 @@ model State {
   RankingRecord PoliticianInRanking[]
 }
 
-model View {
-  id        Int      @id @default(autoincrement())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now())
-
-  name        String
-  description String
-
-  economicFreedom  Int?
-  personalFreedom  Int?
-  politicalFreedom Int?
-
-  people     Person[]
-  parties    PoliticalParty[]
-  candidates Candidate[]
-}
-
 model Person {
   id        Int      @id @default(autoincrement())
   createdAt DateTime @default(now())
@@ -63,8 +46,7 @@ model Person {
 
   contact Contact?
 
-  views      View[]
-  sentiments Sentiment[]
+  reactions Reaction[]
 
   politicianProfile Politician?
   candidateProfile  Candidate?
@@ -88,7 +70,6 @@ model PoliticalParty {
   about          String?
 
   contact Contact?
-  views   View[]
 
   politicians Politician[]
   candidates  Candidate[]
@@ -134,8 +115,21 @@ model Candidate {
   state             State  @relation(fields: [stateAbbreviation], references: [abbreviation])
   stateAbbreviation String
 
-  views      View[]
-  sentiments Sentiment[]
+  reactions   Reaction[]
+  shortVideos CandidateShortVideo[]
+}
+
+model CandidateShortVideo {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+
+  title     String
+  url       String
+  thumbnail String?
+
+  candidate   Candidate @relation(fields: [candidateId], references: [id])
+  candidateId Int       @unique
 }
 
 model Politician {
@@ -159,12 +153,12 @@ model Politician {
   rankings PoliticianInRanking[]
 }
 
-model Sentiment {
+model Reaction {
   id        Int      @id @default(autoincrement())
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now())
 
-  name String
+  type ReactionTypes
 
   person   Person @relation(fields: [personId], references: [id])
   personId Int    @unique
@@ -205,43 +199,44 @@ model PoliticianInRanking {
   party             PoliticalParty? @relation(fields: [partyAbbreviation], references: [abbreviation])
   partyAbbreviation String?
 
-  state             State  @relation(fields: [stateAbbreviation], references: [abbreviation])
-  stateAbbreviation String
+  state             State?  @relation(fields: [stateAbbreviation], references: [abbreviation])
+  stateAbbreviation String?
 
-  candidateType String
+  candidateType String?
 
-  quantityVote            Int
-  reelected               Boolean
-  cutAidShift             Boolean
-  isPresident             Boolean
-  cutHousingAllowance     Boolean
-  cutRetirement           Boolean
-  requestedFamilyPassport Boolean
-  quotaAmountSum          Int
+  quantityVote            Int?
+  reelected               Boolean?
+  cutAidShift             Boolean?
+  isPresident             Boolean?
+  cutHousingAllowance     Boolean?
+  cutRetirement           Boolean?
+  requestedFamilyPassport Boolean?
+  quotaAmountSum          Int?
 
-  scorePresence   Float
-  scoreSaveQuota  Float
-  scoreProcess    Float
-  scoreInternal   Float
-  scorePrivileges Float
-  scoreWastage    Float
-  scoreTotal      Float
+  scorePresence   Float?
+  scoreSaveQuota  Float?
+  scoreProcess    Float?
+  scoreInternal   Float?
+  scorePrivileges Float?
+  scoreWastage    Float?
+  scoreTotal      Float?
 
-  scoreRanking           Float
-  scoreRankingByPosition Float
-  scoreRankingByParty    Float
-  scoreRankingByState    Float
+  scoreRanking           Int?
+  scoreRankingByPosition Int?
+  scoreRankingByParty    Int?
+  scoreRankingByState    Int?
 
-  scorePresenceFormula        String
-  scoreProcessFormula         String
-  scorePrivilegesFormula      String
-  scoreSaveQuotaFormula       String
-  scoreWastageFormula         String
-  scoreTotalFormula           String
-  parliamentarianCount        String
-  parliamentarianStateCount   String
-  parliamentarianStaffMaxYear String
-  parliamentarianQuotaMaxYear String
+  scorePresenceFormula   String?
+  scoreProcessFormula    String?
+  scorePrivilegesFormula String?
+  scoreSaveQuotaFormula  String?
+  scoreWastageFormula    String?
+  scoreTotalFormula      String?
+
+  parliamentarianCount        Int?
+  parliamentarianStateCount   Int?
+  parliamentarianStaffMaxYear Float?
+  parliamentarianQuotaMaxYear Float?
 
   card CardModel?
 
@@ -365,26 +360,12 @@ enum SkinColor {
   Other
 }
 
-enum OrganizationType {
-  PoliticalParty
-  ThinkTank
-  Media
-  Government
-}
-
 enum Sex {
   Male
   Female
 }
 
-enum VoteOptions {
-  Yes
-  No
-  Absent
-}
-
-enum VoteGuidanceOptions {
-  Yes
-  No
-  Any
+enum ReactionTypes {
+  like
+  dislike
 }

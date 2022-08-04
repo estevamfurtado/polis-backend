@@ -13,20 +13,6 @@ Table State {
   RankingRecord PoliticianInRanking [not null]
 }
 
-Table View {
-  id Int [pk, increment]
-  createdAt DateTime [default: `now()`, not null]
-  updatedAt DateTime [default: `now()`, not null]
-  name String [not null]
-  description String [not null]
-  economicFreedom Int
-  personalFreedom Int
-  politicalFreedom Int
-  people Person [not null]
-  parties PoliticalParty [not null]
-  candidates Candidate [not null]
-}
-
 Table Person {
   id Int [pk, increment]
   createdAt DateTime [default: `now()`, not null]
@@ -44,8 +30,7 @@ Table Person {
   voteState State [not null]
   voteStateAbbreviation String [not null]
   contact Contact
-  views View [not null]
-  sentiments Sentiment [not null]
+  reactions Reaction [not null]
   politicianProfile Politician
   candidateProfile Candidate
   Album Album
@@ -66,7 +51,6 @@ Table PoliticalParty {
   secondaryColor String
   about String
   contact Contact
-  views View [not null]
   politicians Politician [not null]
   candidates Candidate [not null]
   rankingRecords PoliticianInRanking [not null]
@@ -103,8 +87,19 @@ Table Candidate {
   partyAbbreviation String [not null]
   state State [not null]
   stateAbbreviation String [not null]
-  views View [not null]
-  sentiments Sentiment [not null]
+  reactions Reaction [not null]
+  shortVideos CandidateShortVideo [not null]
+}
+
+Table CandidateShortVideo {
+  id Int [pk, increment]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [default: `now()`, not null]
+  title String [not null]
+  url String [not null]
+  thumbnail String
+  candidate Candidate [not null]
+  candidateId Int [unique, not null]
 }
 
 Table Politician {
@@ -124,11 +119,11 @@ Table Politician {
   rankings PoliticianInRanking [not null]
 }
 
-Table Sentiment {
+Table Reaction {
   id Int [pk, increment]
   createdAt DateTime [default: `now()`, not null]
   updatedAt DateTime [default: `now()`, not null]
-  name String [not null]
+  type ReactionTypes [not null]
   person Person [not null]
   personId Int [unique, not null]
   candidate Candidate [not null]
@@ -162,38 +157,38 @@ Table PoliticianInRanking {
   rankingId Int [not null]
   party PoliticalParty
   partyAbbreviation String
-  state State [not null]
-  stateAbbreviation String [not null]
-  candidateType String [not null]
-  quantityVote Int [not null]
-  reelected Boolean [not null]
-  cutAidShift Boolean [not null]
-  isPresident Boolean [not null]
-  cutHousingAllowance Boolean [not null]
-  cutRetirement Boolean [not null]
-  requestedFamilyPassport Boolean [not null]
-  quotaAmountSum Int [not null]
-  scorePresence Float [not null]
-  scoreSaveQuota Float [not null]
-  scoreProcess Float [not null]
-  scoreInternal Float [not null]
-  scorePrivileges Float [not null]
-  scoreWastage Float [not null]
-  scoreTotal Float [not null]
-  scoreRanking Float [not null]
-  scoreRankingByPosition Float [not null]
-  scoreRankingByParty Float [not null]
-  scoreRankingByState Float [not null]
-  scorePresenceFormula String [not null]
-  scoreProcessFormula String [not null]
-  scorePrivilegesFormula String [not null]
-  scoreSaveQuotaFormula String [not null]
-  scoreWastageFormula String [not null]
-  scoreTotalFormula String [not null]
-  parliamentarianCount String [not null]
-  parliamentarianStateCount String [not null]
-  parliamentarianStaffMaxYear String [not null]
-  parliamentarianQuotaMaxYear String [not null]
+  state State
+  stateAbbreviation String
+  candidateType String
+  quantityVote Int
+  reelected Boolean
+  cutAidShift Boolean
+  isPresident Boolean
+  cutHousingAllowance Boolean
+  cutRetirement Boolean
+  requestedFamilyPassport Boolean
+  quotaAmountSum Int
+  scorePresence Float
+  scoreSaveQuota Float
+  scoreProcess Float
+  scoreInternal Float
+  scorePrivileges Float
+  scoreWastage Float
+  scoreTotal Float
+  scoreRanking Int
+  scoreRankingByPosition Int
+  scoreRankingByParty Int
+  scoreRankingByState Int
+  scorePresenceFormula String
+  scoreProcessFormula String
+  scorePrivilegesFormula String
+  scoreSaveQuotaFormula String
+  scoreWastageFormula String
+  scoreTotalFormula String
+  parliamentarianCount Int
+  parliamentarianStateCount Int
+  parliamentarianStaffMaxYear Float
+  parliamentarianQuotaMaxYear Float
   card CardModel
 
   indexes {
@@ -289,21 +284,6 @@ Table Deck {
   }
 }
 
-Table PersonToView {
-  peopleId Int [ref: > Person.id]
-  viewsId Int [ref: > View.id]
-}
-
-Table PoliticalPartyToView {
-  partiesId String [ref: > PoliticalParty.abbreviation]
-  viewsId Int [ref: > View.id]
-}
-
-Table CandidateToView {
-  candidatesId Int [ref: > Candidate.id]
-  viewsId Int [ref: > View.id]
-}
-
 Enum EconomicClass {
   A
   B
@@ -320,28 +300,14 @@ Enum SkinColor {
   Other
 }
 
-Enum OrganizationType {
-  PoliticalParty
-  ThinkTank
-  Media
-  Government
-}
-
 Enum Sex {
   Male
   Female
 }
 
-Enum VoteOptions {
-  Yes
-  No
-  Absent
-}
-
-Enum VoteGuidanceOptions {
-  Yes
-  No
-  Any
+Enum ReactionTypes {
+  like
+  dislike
 }
 
 Ref: Person.voteStateAbbreviation > State.abbreviation
@@ -358,15 +324,17 @@ Ref: Candidate.partyAbbreviation > PoliticalParty.abbreviation
 
 Ref: Candidate.stateAbbreviation > State.abbreviation
 
+Ref: CandidateShortVideo.candidateId > Candidate.id
+
 Ref: Politician.personId - Person.id
 
 Ref: Politician.partyAbbreviation > PoliticalParty.abbreviation
 
 Ref: Politician.stateAbbreviation > State.abbreviation
 
-Ref: Sentiment.personId > Person.id
+Ref: Reaction.personId > Person.id
 
-Ref: Sentiment.candidateId > Candidate.id
+Ref: Reaction.candidateId > Candidate.id
 
 Ref: PoliticianInRanking.politicianId > Politician.id
 
