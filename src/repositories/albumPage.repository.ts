@@ -10,15 +10,15 @@ export type UpdateInput = pkg.Prisma.AlbumPageUpdateInput
 
 
 async function create (albumPage: CreateInput) {
-    return db.create({data: albumPage});
+    return await db.create({data: albumPage});
 }
 
 async function get (id: number) {
-    return db.findFirst({where: {id}});
+    return await db.findFirst({where: {id}});
 }
 
 async function update (id: number, albumPage: UpdateInput) {
-    return db.update({where: {id}, data: albumPage});
+    return await db.update({where: {id}, data: albumPage});
 }
 
 

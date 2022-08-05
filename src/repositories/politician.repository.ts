@@ -9,15 +9,15 @@ export type UpdateInput = pkg.Prisma.PoliticianUpdateInput
 
 
 async function create (politician: CreateInput) {
-    return db.create({data: politician});
+    return await db.create({data: politician});
 }
 
 async function get (id: number) {
-    return db.findFirst({where: {id}});
+    return await db.findFirst({where: {id}});
 }
 
 async function update (id: number, politician: UpdateInput) {
-    return db.update({where: {id}, data: politician});
+    return await db.update({where: {id}, data: politician});
 }
 
 export default {

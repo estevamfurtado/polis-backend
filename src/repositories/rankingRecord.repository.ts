@@ -9,15 +9,15 @@ export type UpdateInput = pkg.Prisma.RankingRecordUpdateInput
 
 
 async function create (rankingRecord: CreateInput) {
-    return db.create({data: rankingRecord});
+    return await db.create({data: rankingRecord});
 }
 
 async function get (id: number) {
-    return db.findFirst({where: {id}});
+    return await db.findFirst({where: {id}});
 }
 
 async function update (id: number, rankingRecord: UpdateInput) {
-    return db.update({where: {id}, data: rankingRecord});
+    return await db.update({where: {id}, data: rankingRecord});
 }
 
 export default {

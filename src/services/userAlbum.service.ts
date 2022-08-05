@@ -16,4 +16,13 @@ async function validateOrCrash (id: number) : Promise<Element> {
     return result;
 }
 
-export default { validateOrCrash };
+async function getByAlbumAndPerson (albumId: number, personId: number) {
+    const result = await repo.getByAlbumAndPerson(albumId, personId);
+    return result;
+}
+
+async function connectToCard (albumId: number, cardId: number) {
+    return await repo.connectToCard(albumId, cardId);
+}
+
+export default { validateOrCrash, getByAlbumAndPerson, connectToCard };

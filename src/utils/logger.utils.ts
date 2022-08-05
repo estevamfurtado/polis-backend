@@ -4,7 +4,8 @@ import { NextFunction, Request, Response } from 'express';
 
 const types = {
     middleware: chalk.bold.magenta('  [Middleware]'),
-    controller: chalk.bold.blueBright('[Controller]'),
+    controller: chalk.bold.magenta('  [Controller]'),
+    return: chalk.bold.blueBright('[Return]'),
     service: chalk.bold.magenta('    [Service]'),
     repository: chalk.bold.magenta('      [Repository]'),
     db: chalk.bold.blue('      [db]'),

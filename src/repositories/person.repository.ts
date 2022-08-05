@@ -1,5 +1,6 @@
 import pkg from '@prisma/client';
 import database from "../database.js";
+import loggerUtils from '../utils/logger.utils.js';
 
 const db = database.prisma.person;
 
@@ -7,29 +8,30 @@ export type CreateInput = pkg.Prisma.PersonCreateInput
 export type UpdateInput = pkg.Prisma.PersonUpdateInput
 
 
-
 async function create (person: CreateInput) {
-    return db.create({data: person});
+    loggerUtils.log('repository', 'Creating person');
+    const response = await db.create({data: person});
+    return response;
 }
 
 async function get (id: number) {
-    return db.findFirst({where: {id}});
+    return await db.findFirst({where: {id}});
 }
 
 async function getByEmail (email: string) {
-    return db.findFirst({where: {email}});
+    return await db.findFirst({where: {email}});
 }
 
 async function getByCpf (cpf: string) {
-    return db.findFirst({where: {cpf}});
+    return await db.findFirst({where: {cpf}});
 }
 
 async function update (id: number, person: UpdateInput) {
-    return db.update({where: {id}, data: person});
+    return await db.update({where: {id}, data: person});
 }
 
 async function getEncryptedPassword (email: string) {
-    return db.findFirst({
+    return await db.findFirst({
         where: {
             email
         },
@@ -41,8 +43,17 @@ async function getEncryptedPassword (email: string) {
 
 export default {
     create,
-    get,
-    update,
-    getEncryptedPassword,
-    getByEmail
+    get: {
+        vanilla: {
+            whereId: get,
+            whereEmail: getByEmail,
+            whereCpf: getByCpf
+        },
+        encryptedPasword: {
+            whereEmail: getEncryptedPassword,
+        }
+    },
+    update: {
+        whereId: update,
+    }
 }

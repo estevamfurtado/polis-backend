@@ -4,8 +4,10 @@ import logger from "./logger.utils.js";
 
 
 function validateJoiSchemaFromObjectOrCrash(object: any, joiSchema: Joi.AnySchema) {
-    
+
     logger.log('service', 'Validating object joi schema');
+    console.log(object);
+
 
     let values = {};
     const keys = Object.keys(joiSchema.describe().keys);

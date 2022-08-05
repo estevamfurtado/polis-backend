@@ -9,15 +9,15 @@ export type UpdateInput = pkg.Prisma.CandidateUpdateInput
 
 
 async function create (candidate: CreateInput) {
-    return db.create({data: candidate});
+    return await db.create({data: candidate});
 }
 
 async function get (id: number) {
-    return db.findFirst({where: {id}});
+    return await db.findFirst({where: {id}});
 }
 
 async function update (id: number, candidate: UpdateInput) {
-    return db.update({where: {id}, data: candidate});
+    return await db.update({where: {id}, data: candidate});
 }
 
 export default {

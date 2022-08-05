@@ -9,15 +9,15 @@ export type UpdateInput = pkg.Prisma.ReactionUpdateInput
 
 
 async function create (reaction: CreateInput) {
-    return db.create({data: reaction});
+    return await db.create({data: reaction});
 }
 
 async function get (id: number) {
-    return db.findFirst({where: {id}});
+    return await db.findFirst({where: {id}});
 }
 
 async function update (id: number, reaction: UpdateInput) {
-    return db.update({where: {id}, data: reaction});
+    return await db.update({where: {id}, data: reaction});
 }
 
 export default {

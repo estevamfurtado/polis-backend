@@ -9,19 +9,28 @@ export type UpdateInput = pkg.Prisma.StateUpdateInput
 
 
 async function create (state: CreateInput) {
-    return db.create({data: state});
+    return await db.create({data: state});
 }
 
 async function get (id: number) {
-    return db.findFirst({where: {id}});
+    return await db.findFirst({where: {id}});
 }
 
 async function update (id: number, state: UpdateInput) {
-    return db.update({where: {id}, data: state});
+    return await db.update({where: {id}, data: state});
+}
+
+async function getByAbbreviation (abbreviation: string) {
+    return await db.findFirst({where: {abbreviation}});
 }
 
 export default {
     create,
-    get,
+    get: {
+        vanilla: {
+            whereId: get,
+            whereAbbreviation: getByAbbreviation
+        }
+    },
     update
 }

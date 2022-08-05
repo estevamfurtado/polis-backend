@@ -9,19 +9,34 @@ export type UpdateInput = pkg.Prisma.AlbumUpdateInput
 
 
 async function create (album: CreateInput) {
-    return db.create({data: album});
+    return await db.create({data: album});
 }
 
 async function get (id: number) {
-    return db.findFirst({where: {id}});
+    return await db.findFirst({where: {id}});
 }
 
 async function update (id: number, album: UpdateInput) {
-    return db.update({where: {id}, data: album});
+    return await db.update({where: {id}, data: album});
+}
+
+async function getByYear (year: number) {
+    return await db.findFirst({where: {year}});
+}
+
+async function createToUser (albumId: number, userId: number) {
+    const userAlbum = await database.prisma.userAlbum.create({
+        data: {
+            user: {connect: {id: userId}},
+            album: {connect: {id: albumId}},
+        }
+    });
 }
 
 export default {
     create,
     get,
-    update
+    update,
+    getByYear,
+    createToUser
 }

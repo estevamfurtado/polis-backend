@@ -9,15 +9,15 @@ export type UpdateInput = pkg.Prisma.CandidateShortVideoUpdateInput
 
 
 async function create (candidateShortVideo: CreateInput) {
-    return db.create({data: candidateShortVideo});
+    return await db.create({data: candidateShortVideo});
 }
 
 async function get (id: number) {
-    return db.findFirst({where: {id}});
+    return await db.findFirst({where: {id}});
 }
 
 async function update (id: number, candidateShortVideo: UpdateInput) {
-    return db.update({where: {id}, data: candidateShortVideo});
+    return await db.update({where: {id}, data: candidateShortVideo});
 }
 
 export default {

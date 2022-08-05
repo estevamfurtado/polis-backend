@@ -4,20 +4,41 @@ import personService from './person.service.js';
 import repos from '../repositories/index.js';
 import { crypt } from '../utils/crypt/index.js';
 import { Person, Prisma } from '@prisma/client';
+import loggerUtils from '../utils/logger.utils.js';
+import stateService from './state.service.js';
+import albumService from './album.service.js';
 
 
-async function signUp (data: Prisma.PersonCreateInput, referralId?: number) {
+type SignUp = Prisma.PersonCreateInput&{voteStateAbbreviation: string};
+
+async function signUp (data: SignUp, referralId?: number) {
+
+    loggerUtils.log('service', 'Signing Up');
+    
+    await personService.get.byEmail.andCrash(data.email);
+    await stateService.validate.byAbbreviation.orCrash(data.voteStateAbbreviation);
+    data.voteState = {connect: {abbreviation: data.voteStateAbbreviation}};
+    delete data.voteStateAbbreviation;
+
     data.cpf = data.cpf.replace(/\./g, '').replace(/-/g, '');
-    const newUser = await personService.createOrCrash(data);
+    data.password = crypt.bcrypt.encrypt(data.password);
+
+    await personService.get.byCpf.andCrash(data.cpf);
+    
+    const newUser = await personService.create.orCrash(data);
+    
     if (referralId) {
         await personService.referredNewUser(referralId);
     }
+
+    await albumService.createLastAlbumToUser(newUser.id);
 }
 
-async function signIn (password: string, email: string) {
-    const user = await personService.findByEmailOrCrash(email);
-    const encryptedPassword = await repos.person.getEncryptedPassword(email);
-    await personService.validatePasswordOrCrash(password, encryptedPassword.password ?? '');
+async function signIn (dados: {email: string, password: string}) {
+    loggerUtils.log('service', 'Signing In');
+    const user = await personService.get.byEmail.orCrash(dados.email);
+    const encryptedPassword = await repos.person.get.encryptedPasword.whereEmail(dados.email);
+    await personService.validate.password.orCrash(dados.password, encryptedPassword.password ?? '');
     const token = crypt.jwt.create(user);
     return token;
 }

@@ -32,4 +32,22 @@ async function createYearBaseModel (year: number) {
     await albumPageService.createAlbumBasePages(album.id, ranking.id);
 }
 
-export default { validateOrCrash, createYearBaseModel };
+
+async function getByYear (year: number) : Promise<Element> {
+    const result = await repo.getByYear(year);
+    return result;
+}
+
+async function createToUser (albumId: number, userId: number) {
+    return await repo.createToUser(albumId, userId);
+}
+
+async function createLastAlbumToUser (userId: number) {
+    const album = await getByYear(2022); 
+    if (album) {
+        await createToUser(userId, album.id);
+    }
+}
+
+
+export default { validateOrCrash, createYearBaseModel, getByYear, createToUser, createLastAlbumToUser };

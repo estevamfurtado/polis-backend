@@ -9,19 +9,43 @@ export type UpdateInput = pkg.Prisma.UserAlbumUpdateInput
 
 
 async function create (userAlbum: CreateInput) {
-    return db.create({data: userAlbum});
+    return await db.create({data: userAlbum});
 }
 
 async function get (id: number) {
-    return db.findFirst({where: {id}});
+    return await db.findFirst({where: {id}});
 }
 
 async function update (id: number, userAlbum: UpdateInput) {
-    return db.update({where: {id}, data: userAlbum});
+    return await db.update({where: {id}, data: userAlbum});
+}
+
+async function getByAlbumAndPerson (albumId: number, personId: number) {
+    return await db.findFirst({where: {albumId, userId: personId},
+        include: { 
+            cards: {
+                include: {
+                    model: true
+                }
+            }
+        }
+    });
+}
+
+async function connectToCard (userAlbumId: number, cardId: number, ) {
+    return await db.update({where: {id: userAlbumId}, data: {
+        cards: {
+            connect: {
+                id: cardId
+            }
+        }
+    }});
 }
 
 export default {
     create,
     get,
-    update
+    update,
+    getByAlbumAndPerson,
+    connectToCard
 }

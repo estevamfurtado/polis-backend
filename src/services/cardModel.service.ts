@@ -24,4 +24,9 @@ async function createByRankingRecord (record: any) {
     return cardModel;
 }
 
-export default { validateOrCrash, createByRankingRecord };
+async function getByRanking (rankingId: number) {
+    const result = await repo.getByRanking(rankingId);
+    return result;
+}
+
+export default { validateOrCrash, createByRankingRecord, getByRanking };
