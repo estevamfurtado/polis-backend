@@ -7,5 +7,5 @@ export default {
     parties: parser.json.read(paths.json.seed.parties).data as Prisma.PoliticalPartyCreateInput[],
     rankings: parser.json.read(paths.json.seed.rankings).data as Prisma.RankingCreateInput[],
     states: parser.json.read(paths.json.seed.states).data as Prisma.StateCreateInput[],
-    records: parser.json.read(paths.json.seed.rankingRecords).data as Prisma.PoliticianInRankingCreateInput[],
+    records: parser.json.read(paths.json.seed.rankingRecords).data as Prisma.RankingRecordCreateInput[],
 };

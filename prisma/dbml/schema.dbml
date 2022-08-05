@@ -3,6 +3,7 @@
 //// ------------------------------------------------------
 
 Table State {
+  id Int [increment, unique, not null]
   createdAt DateTime [default: `now()`, not null]
   updatedAt DateTime [default: `now()`, not null]
   name String [not null]
@@ -10,7 +11,7 @@ Table State {
   people Person [not null]
   politicians Politician [not null]
   candidates Candidate [not null]
-  RankingRecord PoliticianInRanking [not null]
+  RankingRecord RankingRecord [not null]
 }
 
 Table Person {
@@ -27,18 +28,18 @@ Table Person {
   gender String
   economicClass EconomicClass
   skinColor SkinColor
-  voteState State [not null]
-  voteStateAbbreviation String [not null]
+  voteState State
+  voteStateAbbreviation String
   contact Contact
   reactions Reaction [not null]
   politicianProfile Politician
   candidateProfile Candidate
-  Album Album
-  albumId Int
-  Deck Deck [not null]
+  deck Card [not null]
+  albums UserAlbum [not null]
 }
 
 Table PoliticalParty {
+  id Int [increment, unique, not null]
   createdAt DateTime [default: `now()`, not null]
   updatedAt DateTime [default: `now()`, not null]
   cnpj String [unique, not null]
@@ -53,7 +54,7 @@ Table PoliticalParty {
   contact Contact
   politicians Politician [not null]
   candidates Candidate [not null]
-  rankingRecords PoliticianInRanking [not null]
+  rankingRecords RankingRecord [not null]
 }
 
 Table Contact {
@@ -116,7 +117,7 @@ Table Politician {
   state State [not null]
   stateAbbreviation String [not null]
   imageUrl String [not null]
-  rankings PoliticianInRanking [not null]
+  rankings RankingRecord [not null]
 }
 
 Table Reaction {
@@ -137,14 +138,14 @@ Table Ranking {
   updatedAt DateTime [default: `now()`, not null]
   year Int [not null]
   title String [not null]
-  records PoliticianInRanking [not null]
+  records RankingRecord [not null]
 
   indexes {
     (year, title) [unique]
   }
 }
 
-Table PoliticianInRanking {
+Table RankingRecord {
   id Int [pk, increment]
   createdAt DateTime [default: `now()`, not null]
   updatedAt DateTime [default: `now()`, not null]
@@ -206,8 +207,7 @@ Table Album {
   coverUrl String [not null]
   thumbUrl String [not null]
   pages AlbumPage [not null]
-  owners Person [not null]
-  Deck Deck [not null]
+  userAlbums UserAlbum [not null]
 
   indexes {
     (year, title) [unique]
@@ -223,6 +223,9 @@ Table AlbumPage {
   backgroundColor String
   album Album [not null]
   albumId Int [not null]
+  successorId Int [unique]
+  successor AlbumPage
+  predecessor AlbumPage
   stickers Sticker [not null]
 
   indexes {
@@ -238,8 +241,10 @@ Table Sticker {
   pageId Int [not null]
   card CardModel [not null]
   cardId Int [not null]
-  order Int [not null]
   identifier String [not null]
+  successorId Int [unique]
+  successor Sticker
+  predecessor Sticker
 
   indexes {
     (pageId, identifier) [unique]
@@ -250,7 +255,7 @@ Table CardModel {
   id Int [pk, increment]
   createdAt DateTime [default: `now()`, not null]
   updatedAt DateTime [default: `now()`, not null]
-  record PoliticianInRanking
+  record RankingRecord
   recordId Int [unique]
   variant String [not null, default: 'normal']
   imageUrl String [not null]
@@ -265,22 +270,24 @@ Table Card {
   model CardModel [not null]
   modelId Int [not null]
   isPasted Boolean [not null, default: false]
-  Deck Deck
-  deckId Int
+  owner Person
+  ownerId Int
+  album UserAlbum
+  albumId Int
 }
 
-Table Deck {
+Table UserAlbum {
   id Int [pk, increment]
   createdAt DateTime [default: `now()`, not null]
   updatedAt DateTime [default: `now()`, not null]
-  owner Person [not null]
-  ownerId Int [not null]
   album Album [not null]
   albumId Int [not null]
+  user Person [not null]
+  userId Int [not null]
   cards Card [not null]
 
   indexes {
-    (ownerId, albumId) [unique]
+    (albumId, userId) [unique]
   }
 }
 
@@ -312,8 +319,6 @@ Enum ReactionTypes {
 
 Ref: Person.voteStateAbbreviation > State.abbreviation
 
-Ref: Person.albumId > Album.id
-
 Ref: Contact.personId - Person.id
 
 Ref: Contact.partyAbbreviation - PoliticalParty.abbreviation
@@ -336,26 +341,32 @@ Ref: Reaction.personId > Person.id
 
 Ref: Reaction.candidateId > Candidate.id
 
-Ref: PoliticianInRanking.politicianId > Politician.id
+Ref: RankingRecord.politicianId > Politician.id
 
-Ref: PoliticianInRanking.rankingId > Ranking.id
+Ref: RankingRecord.rankingId > Ranking.id
 
-Ref: PoliticianInRanking.partyAbbreviation > PoliticalParty.abbreviation
+Ref: RankingRecord.partyAbbreviation > PoliticalParty.abbreviation
 
-Ref: PoliticianInRanking.stateAbbreviation > State.abbreviation
+Ref: RankingRecord.stateAbbreviation > State.abbreviation
 
 Ref: AlbumPage.albumId > Album.id
+
+Ref: AlbumPage.successorId - AlbumPage.id
 
 Ref: Sticker.pageId > AlbumPage.id
 
 Ref: Sticker.cardId > CardModel.id
 
-Ref: CardModel.recordId - PoliticianInRanking.id
+Ref: Sticker.successorId - Sticker.id
+
+Ref: CardModel.recordId - RankingRecord.id
 
 Ref: Card.modelId > CardModel.id
 
-Ref: Card.deckId > Deck.id
+Ref: Card.ownerId > Person.id
 
-Ref: Deck.ownerId > Person.id
+Ref: Card.albumId > UserAlbum.id
 
-Ref: Deck.albumId > Album.id
+Ref: UserAlbum.albumId > Album.id
+
+Ref: UserAlbum.userId > Person.id

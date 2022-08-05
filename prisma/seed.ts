@@ -83,15 +83,14 @@ async function addRecordsToDatabase() {
     parser.json.write(errors, paths.json.errors.seedRecords);
 }
 
-async function addRecordToDatabase(record: Prisma.Prisma.PoliticianInRankingCreateInput, i: number) {
+async function addRecordToDatabase(record: Prisma.Prisma.RankingRecordCreateInput, i: number) {
     try {
-        await prisma.politicianInRanking.create({ data: record });
+        await prisma.rankingRecord.create({ data: record });
         return true;
     } catch (error) {
         return { error, record, i };
     }
 }
-
 
 main()
     .catch(console.error)

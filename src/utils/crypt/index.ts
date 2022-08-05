@@ -34,7 +34,7 @@ function decodeToken (token: string) {
 }
 
 function encryptBcrypt (value: string) {
-    const encryptedPassword = bcrypt.hashSync(value, bcrypt.genSaltSync(8));
+    const encryptedPassword = bcrypt.hashSync(value, bcrypt.genSaltSync(8)) as string;
     return encryptedPassword;
 }
 function compareBcrypt (value: string, encryptedValue: string) {

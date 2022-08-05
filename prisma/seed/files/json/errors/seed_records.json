@@ -1,1 +1,14 @@
-{"date":"2022-08-04T22:18:12.291Z","data":{"P2025":{"code":"P2025","clientVersion":"3.13.0","meta":{"cause":"No 'PoliticalParty' record(s) (needed to inline the relation on 'PoliticianInRanking' record(s)) was found for a nested connect on one-to-many relation 'PoliticalPartyToPoliticianInRanking'."},"counter":56,"records":[]}}}
+{
+  "date": "2022-08-05T01:28:33.686Z",
+  "data": {
+    "P2025": {
+      "code": "P2025",
+      "clientVersion": "3.13.0",
+      "meta": {
+        "cause": "No 'PoliticalParty' record(s) (needed to inline the relation on 'RankingRecord' record(s)) was found for a nested connect on one-to-many relation 'PoliticalPartyToRankingRecord'."
+      },
+      "counter": 56,
+      "records": []
+    }
+  }
+}
