@@ -3,19 +3,15 @@ import AppError from '../utils/errors/error.utils.js';
 import personService from './person.service.js';
 import repos from '../repositories/index.js';
 import { crypt } from '../utils/crypt/index.js';
-import { Person } from '@prisma/client';
+import { Person, Prisma } from '@prisma/client';
 
 
-async function signUp (password: string, email: string, name: string, cpf: string) {
-
-    const newUser = await personService.createOrCrash({
-        name,
-        cpf,
-        email,
-        password: crypt.bcrypt.encrypt(password)
-    });
-    const token = crypt.jwt.create(newUser);
-    return token;
+async function signUp (data: Prisma.PersonCreateInput, referralId?: number) {
+    data.cpf = data.cpf.replace(/\./g, '').replace(/-/g, '');
+    const newUser = await personService.createOrCrash(data);
+    if (referralId) {
+        await personService.referredNewUser(referralId);
+    }
 }
 
 async function signIn (password: string, email: string) {

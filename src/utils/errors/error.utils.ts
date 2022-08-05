@@ -15,29 +15,8 @@ const errors = {
   "internal": {type: "internal", message: "Internal server error", code: 500}
 } as { [key in AppErrorTypes]: AppError };
 
-function conflict(message?: string): AppError {
-  const error = errors.conflict;
-  return { type: error.type, message: message ?? error.message, code: error.code };
-}
-
-function notFound(message?: string): AppError {
-  const error = errors.not_found;
-  return { type: error.type, message: message ?? error.message, code: error.code };
-}
-
-function unauthorized(message?: string): AppError {
-  const error = errors.unauthorized;
-  return { type: error.type, message: message ?? error.message, code: error.code };
-}
-
-function wrongSchema(message?: string): AppError {
-  const error = errors.wrong_schema;
-  return { type: error.type, message: message ?? error.message, code: error.code };
-}
-
-function internal(message?: string): AppError {
-  const error = errors.internal;
-  return { type: error.type, message: message ?? error.message, code: error.code };
+export function errorTypeToStatusCode(type: AppErrorTypes) {
+  return errors[type] ? errors[type].code : 500;
 }
 
 function any (code?: number, type?: string, message?: string): AppError {
@@ -45,12 +24,20 @@ function any (code?: number, type?: string, message?: string): AppError {
   return { type: error.type, message: message ?? error.message, code: code ?? error.code };
 }
 
+function returnErrorFromType (error: AppError, message: string): AppError {
+  return { type: error.type, message: message, code: error.code };
+}
+
+export function isAppError(error: object): error is AppError {
+  return (error as AppError).type !== undefined;
+}
 
 export default {
   any,
-  conflict,
-  notFound,
-  unauthorized,
-  wrongSchema,
-  internal
+  conflict: (message: string) => {return returnErrorFromType(errors.conflict, message)},
+  notFound: (message: string) => {return returnErrorFromType(errors.not_found, message)},
+  unauthorized: (message: string) => {return returnErrorFromType(errors.unauthorized, message)},
+  wrongSchema: (message: string) => {return returnErrorFromType(errors.wrong_schema, message)},
+  internal: (message: string) => {return returnErrorFromType(errors.internal, message)},
+  isAppError,
 }

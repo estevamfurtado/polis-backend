@@ -20,8 +20,24 @@ async function update (id: number, politicalParty: UpdateInput) {
     return db.update({where: {id}, data: politicalParty});
 }
 
+async function getByRankingIdWithRecordsWithPoliticians(rankingId: number) {
+    return db.findMany({
+        include: {
+            rankingRecords: {
+                where: {
+                    rankingId
+                },
+                include: {
+                    politician: true
+                }
+            }
+        }
+    });
+}
+
 export default {
     create,
     get,
-    update
+    update,
+    getByRankingIdWithRecordsWithPoliticians
 }

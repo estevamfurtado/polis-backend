@@ -16,4 +16,12 @@ async function validateOrCrash (id: number) : Promise<Element> {
     return result;
 }
 
-export default { validateOrCrash };
+async function createByRankingRecord (record: any) {
+    const cardModel = await repo.create({
+        imageUrl: record.politician.imageUrl,
+        record: {connect: {id: record.id}},
+    });
+    return cardModel;
+}
+
+export default { validateOrCrash, createByRankingRecord };

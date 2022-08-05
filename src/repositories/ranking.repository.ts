@@ -16,6 +16,10 @@ async function get (id: number) {
     return db.findFirst({where: {id}});
 }
 
+async function getByYear (year: number) {
+    return db.findFirst({where: {year}});
+}
+
 async function update (id: number, ranking: UpdateInput) {
     return db.update({where: {id}, data: ranking});
 }
@@ -23,5 +27,6 @@ async function update (id: number, ranking: UpdateInput) {
 export default {
     create,
     get,
+    getByYear,
     update
 }

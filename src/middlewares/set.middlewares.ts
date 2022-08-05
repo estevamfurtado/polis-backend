@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import loggerUtils from "../utils/logger.utils";
+import loggerUtils from "../utils/logger.utils.js";
 
 
 export function localsFromRequestData(req: Request, res: Response, next: NextFunction) {

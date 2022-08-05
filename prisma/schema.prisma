@@ -42,10 +42,15 @@ model Person {
   economicClass EconomicClass?
   skinColor     SkinColor?
 
-  voteState             State?  @relation(fields: [voteStateAbbreviation], references: [abbreviation])
   voteStateAbbreviation String?
+  contact               Contact?
 
-  contact Contact?
+  diplomaticAxis Int?
+  economicAxis   Int?
+  civilAxis      Int?
+  socialAxis     Int?
+
+  voteState State? @relation(fields: [voteStateAbbreviation], references: [abbreviation])
 
   reactions Reaction[]
 
@@ -53,6 +58,7 @@ model Person {
   candidateProfile  Candidate?
 
   deck   Card[]
+  packs  Int         @default(18)
   albums UserAlbum[]
 }
 
@@ -163,12 +169,12 @@ model Reaction {
   type ReactionTypes
 
   person   Person @relation(fields: [personId], references: [id])
-  personId Int    @unique
+  personId Int
 
   candidate   Candidate @relation(fields: [candidateId], references: [id])
-  candidateId Int       @unique
+  candidateId Int
 
-  imageUrl String
+  comment String?
 }
 
 model Ranking {
@@ -176,11 +182,9 @@ model Ranking {
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now())
 
-  year    Int
+  year    Int             @unique
   title   String
   records RankingRecord[]
-
-  @@unique([year, title])
 }
 
 model RankingRecord {
@@ -251,11 +255,11 @@ model Album {
   updatedAt DateTime @default(now())
 
   title       String
-  year        Int
+  year        Int    @unique
   description String
 
-  coverUrl String
-  thumbUrl String
+  coverUrl String?
+  thumbUrl String?
 
   pages AlbumPage[]
 

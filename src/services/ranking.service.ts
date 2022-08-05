@@ -16,4 +16,12 @@ async function validateOrCrash (id: number) : Promise<Element> {
     return result;
 }
 
-export default { validateOrCrash };
+async function validateOrCrashByYear (year: number) : Promise<Element> {
+    const result = await repo.getByYear(year);
+    if (!result) {
+        throw AppError.notFound(`Ranking for year ${year} does not exist`);
+    }
+    return result;
+}
+
+export default { validateOrCrash, validateOrCrashByYear };

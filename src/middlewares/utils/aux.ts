@@ -5,7 +5,6 @@ import AppError from "../../utils/errors/error.utils.js";
 
 export async function throwAppError (req: Request, res: Response, next: NextFunction) {
     throw AppError.internal("Test AppError in middleware");
-    throw new Error("Test AppError in middleware");
 }
 
 export async function throwError (req: Request, res: Response, next: NextFunction) {

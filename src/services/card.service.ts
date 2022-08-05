@@ -16,4 +16,7 @@ async function validateOrCrash (id: number) : Promise<Element> {
     return result;
 }
 
-export default { validateOrCrash };
+async function createRandomNewCards (personId: number, amount: number) {
+}
+
+export default { validateOrCrash, createRandomNewCards };

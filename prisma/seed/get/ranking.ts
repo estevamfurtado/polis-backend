@@ -41,7 +41,7 @@ async function getPoliticiansWithCPFFromDatabase() {
     return politicians;
 }
 
-function processRanking(politicians: RawDeputadoFromRankingDosPoliticos[], politiciansInDb: (Prisma.Politician & {person: {cpf: string}})[]) : Prisma.Prisma.PoliticianInRankingCreateInput[] {
+function processRanking(politicians: RawDeputadoFromRankingDosPoliticos[], politiciansInDb: (Prisma.Politician & {person: {cpf: string}})[]) : Prisma.Prisma.RankingRecordCreateInput[] {
     
     console.log(`# deputados: ${politicians.length}`)
     console.log(`# politicians in db: ${politiciansInDb.length}`)
@@ -86,7 +86,7 @@ function processRanking(politicians: RawDeputadoFromRankingDosPoliticos[], polit
                             politician,
                             ...politicianData,
                             ...recordData
-                        } as Prisma.Prisma.PoliticianInRankingCreateInput;
+                        } as Prisma.Prisma.RankingRecordCreateInput;
         
                         records.push(record);
                         recordsSaved++;
@@ -140,7 +140,7 @@ function createPoliticianData(p: any) {
 }
 
 function createRecordData (r: any) {
-    const ranking = {connect: {year_title: {year: r.year, title: 'Ranking dos Políticos'}}} as Prisma.Prisma.RankingCreateNestedOneWithoutRecordsInput;
+    const ranking = {connect: {year: r.year}} as Prisma.Prisma.RankingCreateNestedOneWithoutRecordsInput;
 
     const scores = {
         scorePresence: r.scorePresence,

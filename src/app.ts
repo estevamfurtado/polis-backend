@@ -2,8 +2,7 @@ import cors from "cors";
 import express from "express";
 import "express-async-errors";
 
-import {handleError} from "./middlewares/utils/index.js";
-
+import mw from "./middlewares/index.js"
 import router from "./routers/index.js";
 import testRouter from "./routers/index.js";
 
@@ -18,6 +17,6 @@ if (process.env.NODE_ENV === "test") {
 	app.use('/tests', testRouter);
 }
 
-app.use(handleError);
+app.use(mw.error.errorHandler);
 
 export default app;

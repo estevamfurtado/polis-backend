@@ -2,6 +2,7 @@ import Prisma from '@prisma/client';
 import parser from '../src/utils/parsers/index.js';
 import paths from './seed/files/paths.js';
 import data from './seed/data/index.js';
+import services from '../src/services/index.js';
 
 const { deputados, states, parties, rankings, records } = data;
 
@@ -14,8 +15,6 @@ async function main() {
     console.log(`# deputados: ${deputados.length}`)
     console.log(`# rankings: ${rankings.length}`)
     console.log(`# records: ${records.length}`)
-
-
 
     console.log('Seeding database...');
 
@@ -33,6 +32,9 @@ async function main() {
 
     console.log('>> Creating Records...');
     await addRecordsToDatabase();
+
+    console.log('>> Creating Album...')
+    await services.album.createYearBaseModel(2022);
 
     console.log('Seeding database... done!');
 }

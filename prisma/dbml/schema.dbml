@@ -28,13 +28,18 @@ Table Person {
   gender String
   economicClass EconomicClass
   skinColor SkinColor
-  voteState State
   voteStateAbbreviation String
   contact Contact
+  diplomaticAxis Int
+  economicAxis Int
+  civilAxis Int
+  socialAxis Int
+  voteState State
   reactions Reaction [not null]
   politicianProfile Politician
   candidateProfile Candidate
   deck Card [not null]
+  packs Int [not null, default: 18]
   albums UserAlbum [not null]
 }
 
@@ -126,23 +131,19 @@ Table Reaction {
   updatedAt DateTime [default: `now()`, not null]
   type ReactionTypes [not null]
   person Person [not null]
-  personId Int [unique, not null]
+  personId Int [not null]
   candidate Candidate [not null]
-  candidateId Int [unique, not null]
-  imageUrl String [not null]
+  candidateId Int [not null]
+  comment String
 }
 
 Table Ranking {
   id Int [pk, increment]
   createdAt DateTime [default: `now()`, not null]
   updatedAt DateTime [default: `now()`, not null]
-  year Int [not null]
+  year Int [unique, not null]
   title String [not null]
   records RankingRecord [not null]
-
-  indexes {
-    (year, title) [unique]
-  }
 }
 
 Table RankingRecord {
@@ -202,10 +203,10 @@ Table Album {
   createdAt DateTime [default: `now()`, not null]
   updatedAt DateTime [default: `now()`, not null]
   title String [not null]
-  year Int [not null]
+  year Int [unique, not null]
   description String [not null]
-  coverUrl String [not null]
-  thumbUrl String [not null]
+  coverUrl String
+  thumbUrl String
   pages AlbumPage [not null]
   userAlbums UserAlbum [not null]
 
