@@ -1,9 +1,10 @@
 import repos from '../repositories/index.js';
 import AppError from '../utils/errors/error.utils.js';
-import Prisma from '@prisma/client';
+import Prisma, { Card } from '@prisma/client';
 import cardModelService from './cardModel.service.js';
-import userAlbumService from './userAlbum.service.js';
 import albumService from './album.service.js';
+import loggerUtils from '../utils/logger.utils.js';
+import personRepository from '../repositories/person.repository.js';
 
 type Element = Prisma.Card;
 type CreateInput = Prisma.Prisma.CardCreateInput;
@@ -12,19 +13,22 @@ type UpdateInput = Prisma.Prisma.CardUpdateInput;
 const repo = repos.card;
 
 async function validateOrCrash (id: number) : Promise<Element> {
+    loggerUtils.log('service', 'Validate card by id or crash');
     const result = await repo.get(id);
+    console.log(result);
     if (!result) {
         throw AppError.notFound(`Card with id ${id} does not exist`);
     }
     return result;
 }
 
+async function createRandomNewCardsToUser (ownerId: number, amount: number) {
 
-async function createRandomNewCardsToUser (personId: number, amount: number) {
+    console.log(`create ${amount} to ${ownerId}`)
+
     const getCards = await cardModelService.getByRanking(1);
 
     const model = getCards.sort((a, b) => b.record.scoreTotal - a.record.scoreTotal);
-    console.log(model[0].record.scoreTotal);
 
     const length = model.length;
 
@@ -45,44 +49,66 @@ async function createRandomNewCardsToUser (personId: number, amount: number) {
         modelId = model[index].id;
 
         await repo.create({
-            owner: {connect: {id: personId}},
+            owner: {connect: {id: ownerId}},
             model: {connect: {id: modelId}},
         });
     }
 }
 
 async function pasteAll (userId: number) {
+    loggerUtils.log('service', 'Paste All');
     const cards = await repo.getAllByOwner(userId);
+    
+    const isPastedHT = {}
     for (let i = 0; i < cards.length; i++) {
-        if (!cards[i].isPasted) {
-            await paste(cards[i].id);
+        if (cards[i].isPasted) {
+            isPastedHT[cards[i].modelId] = true
+        }
+    }
+
+    for (let i = 0; i < cards.length; i++) {
+        const card = cards[i];
+        const modelId = card.modelId;
+        const isPasted = card.isPasted;
+
+        if (isPasted) {
+            isPastedHT[modelId] = true;
+        } else if (!isPastedHT[modelId]) {
+            await pasteOrCrash(card);
+            isPastedHT[modelId] = true;
         }
     }
 }
 
-async function paste (cardId: number) {
+async function pasteOrCrash (card: Card) {
+    loggerUtils.log('service', 'Paste card');
+    const cardId = card.id;
+    const modelIsPasted = await checkIfUserHasCardPastedWithSameModel(card);
+    if (modelIsPasted) {
+        throw AppError.forbidden(`There is already a card with model ${card.modelId} pasted by ${card.ownerId}`);
+    }
+    await repo.update(cardId, {isPasted: true});
+}
 
-    const card = await validateOrCrash(cardId);
+async function checkIfUserHasCardPastedWithSameModel (card: Card) {
     const ownerId = card.ownerId;
-
-    // check if UserAlbum already has card
-    const cardWithAlbum = await repo.getWithAlbum(card.modelId);
-    const cardModelId = cardWithAlbum.modelId;
-    const albumId = cardWithAlbum.model.Sticker[0].page.album.id;
-    const userAlbum = await userAlbumService.getByAlbumAndPerson(albumId, ownerId);
-    const userAlbumId = userAlbum.id;
-    let has = false;
-    userAlbum.cards.forEach(card => {
-        if (card.modelId === cardModelId) {
-            has = true;
-        }
-    })
-
-    if (!has) {
-        await userAlbumService.connectToCard(userAlbumId, cardId);
-        await repo.update(cardId, {isPasted: true});
-    }
+    const modelId = card.modelId;
+    const result = await repo.getPastedByOwnerIdModelId(ownerId, modelId);
+    return result.length > 0;
 }
 
+async function getAllCardsFromUser (userId: number) {
+    loggerUtils.log('service', 'getAllCardsFromUser');
+    const cards = await repo.getAllByOwnerWithDetails(userId);
+    return cards;
+}
 
-export default { validateOrCrash, createRandomNewCardsToUser, pasteAll, paste };
+async function validateOwnership(cardId: number, ownerId: number) {
+    const card = await validateOrCrash(cardId);
+    if (card.ownerId !== ownerId) {
+        throw AppError.forbidden(`Card with id ${cardId} is not owned by ${ownerId}`);
+    }
+    return card;
+}
+
+export default { validateOrCrash, createRandomNewCardsToUser, pasteAll, pasteOrCrash, getAllCardsFromUser, validateOwnership };

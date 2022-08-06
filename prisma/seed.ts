@@ -22,7 +22,7 @@ async function main() {
     await prisma.state.createMany({ data: states });
 
     console.log('>> Creating Parties...');
-    await prisma.politicalParty.createMany({ data: parties });
+    await prisma.party.createMany({ data: parties });
 
     console.log('>> Creating Politicians...');
     await addDeputadosToDatabase();
@@ -34,7 +34,7 @@ async function main() {
     await addRecordsToDatabase();
 
     console.log('>> Creating Album...')
-    await services.album.createYearBaseModel(2022);
+    await services.album.createLastYear();
 
     console.log('Seeding database... done!');
 }
@@ -85,9 +85,9 @@ async function addRecordsToDatabase() {
     parser.json.write(errors, paths.json.errors.seedRecords);
 }
 
-async function addRecordToDatabase(record: Prisma.Prisma.RankingRecordCreateInput, i: number) {
+async function addRecordToDatabase(record: Prisma.Prisma.RecordCreateInput, i: number) {
     try {
-        await prisma.rankingRecord.create({ data: record });
+        await prisma.record.create({ data: record });
         return true;
     } catch (error) {
         return { error, record, i };

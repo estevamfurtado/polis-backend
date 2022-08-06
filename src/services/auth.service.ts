@@ -28,10 +28,8 @@ async function signUp (data: SignUp, referralId?: number) {
     const newUser = await personService.create.orCrash(data);
     
     if (referralId) {
-        await personService.referredNewUser(referralId);
+        await personService.actions.referredNewUser(referralId);
     }
-
-    await albumService.createLastAlbumToUser(newUser.id);
 }
 
 async function signIn (dados: {email: string, password: string}) {

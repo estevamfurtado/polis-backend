@@ -14,15 +14,15 @@ generator dbml {
 // MODELS -----------------------------------------------------------------
 
 model State {
-  id            Int             @unique @default(autoincrement())
-  createdAt     DateTime        @default(now())
-  updatedAt     DateTime        @default(now())
-  name          String
-  abbreviation  String          @id @unique
-  people        Person[]
-  politicians   Politician[]
-  candidates    Candidate[]
-  RankingRecord RankingRecord[]
+  id           Int          @unique @default(autoincrement())
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @default(now())
+  name         String
+  abbreviation String       @id @unique
+  people       Person[]
+  politicians  Politician[]
+  candidates   Candidate[]
+  records      Record[]
 }
 
 model Person {
@@ -57,12 +57,11 @@ model Person {
   politicianProfile Politician?
   candidateProfile  Candidate?
 
-  deck   Card[]
-  packs  Int         @default(18)
-  albums UserAlbum[]
+  deck  Card[]
+  packs Int    @default(18)
 }
 
-model PoliticalParty {
+model Party {
   id        Int      @unique @default(autoincrement())
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now())
@@ -82,7 +81,7 @@ model PoliticalParty {
   politicians Politician[]
   candidates  Candidate[]
 
-  rankingRecords RankingRecord[]
+  records Record[]
 }
 
 model Contact {
@@ -103,8 +102,8 @@ model Contact {
   person   Person? @relation(fields: [personId], references: [id])
   personId Int?    @unique
 
-  party             PoliticalParty? @relation(fields: [partyAbbreviation], references: [abbreviation])
-  partyAbbreviation String?         @unique
+  party             Party?  @relation(fields: [partyAbbreviation], references: [abbreviation])
+  partyAbbreviation String? @unique
 }
 
 model Candidate {
@@ -117,7 +116,7 @@ model Candidate {
   person      Person @relation(fields: [personId], references: [id])
   personId    Int    @unique
 
-  party             PoliticalParty @relation(fields: [partyAbbreviation], references: [abbreviation])
+  party             Party  @relation(fields: [partyAbbreviation], references: [abbreviation])
   partyAbbreviation String
 
   state             State  @relation(fields: [stateAbbreviation], references: [abbreviation])
@@ -151,14 +150,14 @@ model Politician {
   personId    Int    @unique
   officialId  String @unique
 
-  party             PoliticalParty @relation(fields: [partyAbbreviation], references: [abbreviation])
+  party             Party  @relation(fields: [partyAbbreviation], references: [abbreviation])
   partyAbbreviation String
 
   state             State  @relation(fields: [stateAbbreviation], references: [abbreviation])
   stateAbbreviation String
 
   imageUrl String
-  rankings RankingRecord[]
+  records  Record[]
 }
 
 model Reaction {
@@ -182,12 +181,12 @@ model Ranking {
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now())
 
-  year    Int             @unique
+  year    Int      @unique
   title   String
-  records RankingRecord[]
+  records Record[]
 }
 
-model RankingRecord {
+model Record {
   id        Int      @id @default(autoincrement())
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now())
@@ -202,7 +201,7 @@ model RankingRecord {
   ranking   Ranking @relation(fields: [rankingId], references: [id])
   rankingId Int
 
-  party             PoliticalParty? @relation(fields: [partyAbbreviation], references: [abbreviation])
+  party             Party?  @relation(fields: [partyAbbreviation], references: [abbreviation])
   partyAbbreviation String?
 
   state             State?  @relation(fields: [stateAbbreviation], references: [abbreviation])
@@ -244,7 +243,7 @@ model RankingRecord {
   parliamentarianStaffMaxYear Float?
   parliamentarianQuotaMaxYear Float?
 
-  card CardModel?
+  cardModel CardModel?
 
   @@unique([rankingId, politicianId])
 }
@@ -261,14 +260,14 @@ model Album {
   coverUrl String?
   thumbUrl String?
 
-  pages AlbumPage[]
-
-  userAlbums UserAlbum[]
+  entryPage   Page?  @relation(name: "EntryPage", fields: [entryPageId], references: [id])
+  entryPageId Int?   @unique
+  pages       Page[] @relation("Pages")
 
   @@unique([year, title])
 }
 
-model AlbumPage {
+model Page {
   id        Int      @id @default(autoincrement())
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now())
@@ -277,14 +276,17 @@ model AlbumPage {
   description     String
   backgroundColor String?
 
-  album   Album @relation(fields: [albumId], references: [id])
-  albumId Int
+  successorId Int?  @unique
+  successor   Page? @relation("PagesOrder", fields: [successorId], references: [id])
+  predecessor Page? @relation("PagesOrder")
 
-  successorId Int?       @unique
-  successor   AlbumPage? @relation("PagesOrder", fields: [successorId], references: [id])
-  predecessor AlbumPage? @relation("PagesOrder")
+  albumId      Int
+  entryInAlbum Album? @relation("EntryPage")
+  album        Album  @relation(name: "Pages", fields: [albumId], references: [id])
 
-  stickers Sticker[]
+  entrySticker   Sticker?  @relation(name: "EntrySticker", fields: [entryStickerId], references: [id])
+  entryStickerId Int?      @unique
+  stickers       Sticker[] @relation("Stickers")
 
   @@unique([albumId, title])
 }
@@ -294,7 +296,6 @@ model Sticker {
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now())
 
-  page   AlbumPage @relation(fields: [pageId], references: [id])
   pageId Int
 
   card       CardModel @relation(fields: [cardId], references: [id])
@@ -305,6 +306,9 @@ model Sticker {
   successor   Sticker? @relation("StickersOrder", fields: [successorId], references: [id])
   predecessor Sticker? @relation("StickersOrder")
 
+  entryInPage Page? @relation("EntrySticker")
+  page        Page  @relation(name: "Stickers", fields: [pageId], references: [id])
+
   @@unique([pageId, identifier])
 }
 
@@ -313,14 +317,14 @@ model CardModel {
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now())
 
-  record   RankingRecord? @relation(fields: [recordId], references: [id])
-  recordId Int?           @unique
+  record   Record? @relation(fields: [recordId], references: [id])
+  recordId Int?    @unique
 
   variant  String @default("normal")
   imageUrl String
 
-  Sticker Sticker[]
-  Card    Card[]
+  stickers Sticker[]
+  cards    Card[]
 }
 
 model Card {
@@ -335,25 +339,6 @@ model Card {
 
   owner   Person? @relation(fields: [ownerId], references: [id])
   ownerId Int?
-
-  album   UserAlbum? @relation(fields: [albumId], references: [id])
-  albumId Int?
-}
-
-model UserAlbum {
-  id        Int      @id @default(autoincrement())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now())
-
-  album   Album @relation(fields: [albumId], references: [id])
-  albumId Int
-
-  user   Person @relation(fields: [userId], references: [id])
-  userId Int
-
-  cards Card[]
-
-  @@unique([albumId, userId])
 }
 
 // ENUMS -----------------------------------------------------------------

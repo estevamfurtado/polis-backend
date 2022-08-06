@@ -1,2 +1,0 @@
--- AlterTable
-ALTER TABLE "Person" ADD COLUMN     "packs" INTEGER NOT NULL DEFAULT 18;

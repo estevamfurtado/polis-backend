@@ -1,3 +1,0 @@
--- AlterTable
-ALTER TABLE "Album" ALTER COLUMN "coverUrl" DROP NOT NULL,
-ALTER COLUMN "thumbUrl" DROP NOT NULL;

@@ -40,12 +40,6 @@ function createFileFromText(filePath: string, text: string, searchValues: string
     }
 }
 
-
-// State, Person, PoliticalParty, Contact, Candidate, CandidateShortVideo,
-// Politician, Reaction, Ranking, RankingRecord, Album, AlbumPage,
-// Sticker, CardModel, Card, UserAlbum
-
-
 const original = {
     prefix: '',
     name: 'person',
@@ -55,20 +49,19 @@ const original = {
 const copies = [
     {name: 'state', replaceValues: ['State', 'state']},
     {name: 'person', replaceValues: ['Person', 'person']},
-    {name: 'politicalParty', replaceValues: ['PoliticalParty', 'politicalParty']},
+    {name: 'party', replaceValues: ['Party', 'party']},
     {name: 'contact', replaceValues: ['Contact', 'contact']},
     {name: 'candidate', replaceValues: ['Candidate', 'candidate']},
     {name: 'candidateShortVideo', replaceValues: ['CandidateShortVideo', 'candidateShortVideo']},
     {name: 'politician', replaceValues: ['Politician', 'politician']},
     {name: 'reaction', replaceValues: ['Reaction', 'reaction']},
     {name: 'ranking', replaceValues: ['Ranking', 'ranking']},
-    {name: 'rankingRecord', replaceValues: ['RankingRecord', 'rankingRecord']},
+    {name: 'record', replaceValues: ['Record', 'record']},
     {name: 'album', replaceValues: ['Album', 'album']},
-    {name: 'albumPage', replaceValues: ['AlbumPage', 'albumPage']},
+    {name: 'page', replaceValues: ['Page', 'page']},
     {name: 'sticker', replaceValues: ['Sticker', 'sticker']},
     {name: 'cardModel', replaceValues: ['CardModel', 'cardModel']},
     {name: 'card', replaceValues: ['Card', 'card']},
-    {name: 'userAlbum', replaceValues: ['UserAlbum', 'userAlbum']}
 ]
 
 function replicateRepositories () {

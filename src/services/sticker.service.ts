@@ -17,10 +17,10 @@ async function validateOrCrash (id: number) : Promise<Element> {
     return result;
 }
 
-async function createPartyPageBaseStickers(albumId: number, pageId: number, orderedRankingRecords: any[]) {
+async function createPartyPageBaseStickers(albumId: number, pageId: number, orderedRecords: any[]) {
     let predecessorId = null;
     let identifier = 1;
-    for (const record of orderedRankingRecords) {
+    for (const record of orderedRecords) {
         const sticker = await createChainedPartyPageBaseSticker(pageId, record, identifier, predecessorId)
         predecessorId = sticker.id;
         identifier++;

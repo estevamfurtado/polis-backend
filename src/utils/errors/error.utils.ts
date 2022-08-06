@@ -1,5 +1,5 @@
 
-type AppErrorTypes = "conflict" | "not_found" | "unauthorized" | "wrong_schema" | "internal";
+type AppErrorTypes = "conflict" | "not_found" | "unauthorized" | "wrong_schema" | "internal" | "forbidden";
 
 export interface AppError {
   type: AppErrorTypes;
@@ -12,7 +12,8 @@ const errors = {
   "unauthorized": {type: "unauthorized", message: "Unauthorized", code: 401},
   "wrong_schema": {type: "wrong_schema", message: "Wrong schema", code: 400},
   "conflict": {type: "conflict", message: "Conflict", code: 409},
-  "internal": {type: "internal", message: "Internal server error", code: 500}
+  "internal": {type: "internal", message: "Internal server error", code: 500},
+  "forbidden": {type: "forbidden", message: "Forbidden", code: 403},
 } as { [key in AppErrorTypes]: AppError };
 
 export function errorTypeToStatusCode(type: AppErrorTypes) {
@@ -39,5 +40,6 @@ export default {
   unauthorized: (message: string) => {return returnErrorFromType(errors.unauthorized, message)},
   wrongSchema: (message: string) => {return returnErrorFromType(errors.wrong_schema, message)},
   internal: (message: string) => {return returnErrorFromType(errors.internal, message)},
+  forbidden: (message: string) => {return returnErrorFromType(errors.forbidden, message)},
   isAppError,
 }

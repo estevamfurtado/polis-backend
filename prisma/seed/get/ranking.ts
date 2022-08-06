@@ -30,7 +30,7 @@ async function readRanking() {
     const records = processRanking(deputados, politiciansInDb);
 
     console.log('Saving ranking seed data...');
-    parsers.json.write(records, paths.json.seed.rankingRecords);
+    parsers.json.write(records, paths.json.seed.records);
 
     console.log('Seed data saved!');
 }
@@ -41,7 +41,7 @@ async function getPoliticiansWithCPFFromDatabase() {
     return politicians;
 }
 
-function processRanking(politicians: RawDeputadoFromRankingDosPoliticos[], politiciansInDb: (Prisma.Politician & {person: {cpf: string}})[]) : Prisma.Prisma.RankingRecordCreateInput[] {
+function processRanking(politicians: RawDeputadoFromRankingDosPoliticos[], politiciansInDb: (Prisma.Politician & {person: {cpf: string}})[]) : Prisma.Prisma.RecordCreateInput[] {
     
     console.log(`# deputados: ${politicians.length}`)
     console.log(`# politicians in db: ${politiciansInDb.length}`)
@@ -86,7 +86,7 @@ function processRanking(politicians: RawDeputadoFromRankingDosPoliticos[], polit
                             politician,
                             ...politicianData,
                             ...recordData
-                        } as Prisma.Prisma.RankingRecordCreateInput;
+                        } as Prisma.Prisma.RecordCreateInput;
         
                         records.push(record);
                         recordsSaved++;
@@ -113,8 +113,8 @@ function createPoliticianData(p: any) {
         sourceName: 'Ranking dos Políticos'
     }
     
-    const party = {connect: {abbreviation: p.parliamentarian.party.prefix}} as Prisma.Prisma.PoliticalPartyCreateNestedOneWithoutRankingRecordsInput;
-    const state = {connect: {abbreviation: p.parliamentarian.state.prefix}} as Prisma.Prisma.StateCreateNestedOneWithoutRankingRecordInput;
+    const party = {connect: {abbreviation: p.parliamentarian.party.prefix}} as Prisma.Prisma.PartyCreateNestedOneWithoutRecordsInput;
+    const state = {connect: {abbreviation: p.parliamentarian.state.prefix}} as Prisma.Prisma.StateCreateNestedOneWithoutRecordsInput;
     const info = {
         party,
         state,

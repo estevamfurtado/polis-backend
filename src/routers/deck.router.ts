@@ -13,11 +13,11 @@ router.get("/",
 );
 
 // get deck/packs
-router.get("/packs",
-    mw.help.logRoute("Get deck packs"),
-    mw.auth.validateToken,
-    ct.deck.getDeckPacks
-);
+// router.get("/packs",
+//     mw.help.logRoute("Get deck packs"),
+//     mw.auth.validateToken,
+//     ct.deck.getDeckPacks
+// );
 
 // post deck/packs/open-all
 router.post("/packs/open-all",
@@ -44,6 +44,7 @@ router.post("/paste-all",
 router.post("/paste/:cardId",
     mw.help.logRoute("Paste card"),
     mw.auth.validateToken,
+    mw.set.localsFromRequestData,
     ct.deck.pasteCard
 );
 

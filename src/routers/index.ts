@@ -2,7 +2,7 @@ import { Router } from "express";
 
 import album from './album.router.js'
 import auth from './auth.router.js'
-import deck from './auth.router.js'
+import deck from './deck.router.js'
 import ranking from './ranking.router.js'
 import tinder from './tinder.router.js'
 import user from './user.router.js'

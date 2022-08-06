@@ -18,7 +18,7 @@ const json = {
         rankings: path.resolve(__dirname, './json/seed/rankings.json'),
         states: path.resolve(__dirname, './json/seed/states.json'),
         parties: path.resolve(__dirname, './json/seed/parties.json'),
-        rankingRecords: path.resolve(__dirname, './json/seed/records.json'),
+        records: path.resolve(__dirname, './json/seed/records.json'),
     }
 }
 const csv = {

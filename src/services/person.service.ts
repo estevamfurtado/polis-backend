@@ -19,6 +19,7 @@ async function get (id: number) : Promise<Element> {
 }
 
 async function validateOrCrash (id: number) : Promise<Element> {
+    loggerUtils.log('service', 'Validating person or crash');
     const result = await repo.get.vanilla.whereId(id);
     if (!result) {
         throw AppError.notFound(`Person with id ${id} does not exist`);
@@ -76,15 +77,34 @@ async function referredNewUser (referralId: number) : Promise<void> {
     }
 }
 
-async function openPacks (id: number, packs?: number) {
-    const person = await validateOrCrash(id);
+async function openPacks (personId: number, packs?: number) {
+
+    loggerUtils.log('service', 'Opening packs');
+
+    const person = await validateOrCrash(personId);
+    console.log(person.id)
+
     if (person.packs > 0) {
         let amount = packs ? (person.packs > packs ? packs: person.packs) : person.packs;
+        console.log(`PACKS: ${person.packs} - ${amount} = ${person.packs - amount}`);
         person.packs -= amount;
-        await repo.update.whereId(person.id, person);
-        await cardService.createRandomNewCardsToUser(person.id, amount*_PACK_SIZE);
+        const cardsAmount = amount * _PACK_SIZE;
+        console.log(`CARDS: ${cardsAmount} to ${person.id} (${personId})`);
+        await cardService.createRandomNewCardsToUser(personId, cardsAmount);
+        const updated = await repo.update.whereId(personId, person);
     } else {
         throw AppError.conflict('You have no packs');
+    }
+}
+
+async function getDeck (userId: number) {
+    loggerUtils.log('service', 'Getting deck');
+    const person = await validateOrCrash(userId);
+    console.log(person);
+    const cards = await cardService.getAllCardsFromUser(userId);
+    return {
+        packs: person.packs,
+        cards
     }
 }
 
@@ -113,6 +133,7 @@ export default {
     },
     actions: {
         referredNewUser,
-        openPacks
+        openPacks,
+        getDeck
     }
 };

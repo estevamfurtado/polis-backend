@@ -19,7 +19,7 @@ function decryptCryptr (value: string) {
 
 function createToken (saveData: any) {
     const data = {...saveData};
-    const config = { expiresIn: '1h' };
+    const config = { expiresIn: '6h' };
     const token = jwt.sign(data, secretKey, config);
     return token;
 }

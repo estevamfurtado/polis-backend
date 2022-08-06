@@ -1,14 +1,17 @@
 import repos from '../repositories/index.js';
 import AppError from '../utils/errors/error.utils.js';
-import Prisma from '@prisma/client';
+import Prisma, { Album } from '@prisma/client';
 import rankingService from './ranking.service.js';
-import albumPageService from './albumPage.service.js';
+import pageService from './page.service.js';
+import loggerUtils from '../utils/logger.utils.js';
 
 type Element = Prisma.Album;
 type CreateInput = Prisma.Prisma.AlbumCreateInput;
 type UpdateInput = Prisma.Prisma.AlbumUpdateInput;
 
 const repo = repos.album;
+
+const _LAST_YEAR = 2022;
 
 async function validateOrCrash (id: number) : Promise<Element> {
     const result = await repo.get(id);
@@ -26,28 +29,27 @@ async function createOrCrash (album: CreateInput) {
     return result;
 }
 
-async function createYearBaseModel (year: number) {
-    const ranking = await rankingService.validateOrCrashByYear(year);
-    const album = await createOrCrash({year, title: 'Casa do Baralho', description: ''});
-    await albumPageService.createAlbumBasePages(album.id, ranking.id);
+async function createLastYear () {
+    const ranking = await rankingService.validateOrCrashByYear(_LAST_YEAR);
+    const album = await createOrCrash({year: _LAST_YEAR, title: 'Casa do Baralho', description: ''});
+    await pageService.createAlbumBasePages(album.id, ranking.id);
 }
 
 
 async function getByYear (year: number) : Promise<Element> {
+    loggerUtils.log('service', 'Getting Album by year');
     const result = await repo.getByYear(year);
     return result;
 }
 
-async function createToUser (albumId: number, userId: number) {
-    return await repo.createToUser(albumId, userId);
+async function getLastAlbumWithDetails () {
+    const album = await repo.getByYear(_LAST_YEAR);
+    return album;
 }
 
-async function createLastAlbumToUser (userId: number) {
-    const album = await getByYear(2022); 
-    if (album) {
-        await createToUser(userId, album.id);
-    }
-}
-
-
-export default { validateOrCrash, createYearBaseModel, getByYear, createToUser, createLastAlbumToUser };
+export default { 
+    validateOrCrash, 
+    getByYear, 
+    getLastAlbumWithDetails,
+    createLastYear
+};

@@ -55,5 +55,5 @@ export default {
     },
     update: {
         whereId: update,
-    }
+    },
 }

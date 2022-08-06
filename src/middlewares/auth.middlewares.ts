@@ -7,7 +7,7 @@ import AppError from "../utils/errors/error.utils.js";
 async function validateToken (req: Request, res: Response, next: NextFunction) {
     loggerUtils.log('middleware', 'Validating token');
 
-    const {authorization} = res.locals || undefined;
+    const {authorization} = req.headers || undefined;
     if (!authorization) {
         throw AppError.unauthorized('No token provided');
     }
@@ -16,8 +16,9 @@ async function validateToken (req: Request, res: Response, next: NextFunction) {
         throw AppError.unauthorized('No token provided');
     }
     const user = services.auth.validateTokenOrCrash(token);
-    res.locals.userId = user.id;
-
+    
+    res.locals.user = {...user};
+    
     next();
 }
 

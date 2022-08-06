@@ -21,16 +21,28 @@ async function update (id: number, album: UpdateInput) {
 }
 
 async function getByYear (year: number) {
-    return await db.findFirst({where: {year}});
+    return await db.findFirst(
+        {where: {year},
+        include: {pages: {select: {id: true}}}}
+    );
 }
 
-async function createToUser (albumId: number, userId: number) {
-    const userAlbum = await database.prisma.userAlbum.create({
-        data: {
-            user: {connect: {id: userId}},
-            album: {connect: {id: albumId}},
+async function getAlbumWithDetails (year: number) {
+    const userAlbum = await db.findFirst({
+        where: {year},
+        include: {
+            pages: {
+                include: {
+                    stickers: {
+                        include: {
+                            card: true
+                        }
+                    }
+                }
+            }
         }
     });
+    return userAlbum;
 }
 
 export default {
@@ -38,5 +50,5 @@ export default {
     get,
     update,
     getByYear,
-    createToUser
+    getAlbumWithDetails
 }

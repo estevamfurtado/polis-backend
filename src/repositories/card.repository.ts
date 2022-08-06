@@ -1,5 +1,6 @@
 import pkg from '@prisma/client';
 import database from "../database.js";
+import loggerUtils from '../utils/logger.utils.js';
 
 const db = database.prisma.card;
 
@@ -13,7 +14,8 @@ async function create (card: CreateInput) {
 }
 
 async function get (id: number) {
-    return await db.findFirst({where: {id}});
+    loggerUtils.log('repository', 'Get card by id');
+    return await db.findFirst({where: {id}}) || null;
 }
 
 async function update (id: number, card: UpdateInput) {
@@ -24,7 +26,7 @@ async function getWithAlbum (id: number) {
     return await db.findFirst({where: {id}, include: {
         model: {
             include: {
-                Sticker: {
+                stickers: {
                     include: {
                         page: {
                             include: {
@@ -38,8 +40,30 @@ async function getWithAlbum (id: number) {
     }});
 }
 
+async function getPastedByOwnerIdModelId (ownerId: number, modelId: number) {
+    return await db.findMany({where: {ownerId, modelId, isPasted: true}});
+}
+
+
 async function getAllByOwner (ownerId: number) {
     return await db.findMany({where: {ownerId}});
+}
+
+async function getAllByOwnerWithDetails (ownerId: number) {
+    return await db.findMany({
+        where: {ownerId},
+        include: {
+            model: {
+                include: {
+                    record: {
+                        include: {
+                            politician: true
+                        }
+                    },
+                }
+            }
+        }
+    });
 }
 
 export default {
@@ -47,5 +71,7 @@ export default {
     get,
     update,
     getWithAlbum,
-    getAllByOwner
+    getAllByOwner,
+    getAllByOwnerWithDetails,
+    getPastedByOwnerIdModelId
 }
