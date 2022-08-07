@@ -16,4 +16,11 @@ async function validateOrCrash (id: number) : Promise<Element> {
     return result;
 }
 
-export default { validateOrCrash };
+async function getAll () {
+    return repo.getAll();
+}
+
+export default { 
+    validateOrCrash,
+    getAll
+};

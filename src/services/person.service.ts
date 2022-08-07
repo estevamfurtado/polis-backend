@@ -4,6 +4,8 @@ import Prisma, { Person } from '@prisma/client';
 import { crypt } from '../utils/crypt/index.js';
 import cardService from './card.service.js';
 import loggerUtils from '../utils/logger.utils.js';
+import { arrayToObject } from '../utils/arrayToObject.js';
+
 
 type Element = Prisma.Person;
 type CreateInput = Prisma.Prisma.PersonCreateInput;
@@ -100,13 +102,77 @@ async function openPacks (personId: number, packs?: number) {
 async function getDeck (userId: number) {
     loggerUtils.log('service', 'Getting deck');
     const person = await validateOrCrash(userId);
-    console.log(person);
-    const cards = await cardService.getAllCardsFromUser(userId);
+    const cards = await cardService.getAllByOwner(userId);
+    const processedCards = processCards(cards)
+
     return {
         packs: person.packs,
-        cards
+        deck: processedCards
     }
 }
+
+type ProcessedDeck = {
+    models: {
+        byId: {
+            [key: number]: {
+                pasted: number[],
+                notPasted: number[]
+            }
+        },
+        ids: number[]
+    },
+    cards: {
+        byId: {[key: number]: Prisma.Card},
+        arrays: {
+            all: number[]
+            pasted: number[],
+            notPasted: number[]
+        }
+    }
+}
+
+function processCards(unprocessedCards: Prisma.Card[]) : ProcessedDeck {
+    
+    const models = {
+        byId: {},
+        ids: []
+    }
+    const cards = {
+        byId: {},
+        arrays: {
+            all: [],
+            pasted: [],
+            notPasted: []
+        }
+    }
+
+    unprocessedCards.forEach(card => {
+        if (!models.byId[card.modelId]) {
+            models.byId[card.modelId] = {
+                pasted: [],
+                notPasted: []
+            }
+            models.ids.push(card.modelId)
+        }
+        if (card.isPasted) {
+            models.byId[card.modelId].pasted.push(card.id)
+            cards.arrays.pasted.push(card.id)
+        } else {
+            models.byId[card.modelId].notPasted.push(card.id)
+            cards.arrays.notPasted.push(card.id)
+        }
+        cards.byId[card.id] = card
+        cards.arrays.all.push(card.id)
+    })
+    
+    const response = {
+        models,
+        cards
+    }
+
+    return response;
+}
+
 
 export default { 
 

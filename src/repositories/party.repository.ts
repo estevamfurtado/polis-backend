@@ -35,9 +35,21 @@ async function getByRankingIdWithRecordsWithPoliticians(rankingId: number) {
     });
 }
 
+async function getAll() {
+    return await db.findMany({
+        include: {
+            politicians: {select: {id: true}},
+            records: {select: {id: true}},
+            candidates: {select: {id: true}},
+            PartyRecord: {select: {id: true}},
+        }
+    });
+}
+
 export default {
     create,
     get,
     update,
-    getByRankingIdWithRecordsWithPoliticians
+    getByRankingIdWithRecordsWithPoliticians,
+    getAll
 }

@@ -12,13 +12,6 @@ router.get("/",
     ct.deck.getDeck
 );
 
-// get deck/packs
-// router.get("/packs",
-//     mw.help.logRoute("Get deck packs"),
-//     mw.auth.validateToken,
-//     ct.deck.getDeckPacks
-// );
-
 // post deck/packs/open-all
 router.post("/packs/open-all",
     mw.help.logRoute("Open all deck packs"),

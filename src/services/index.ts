@@ -7,6 +7,7 @@ import contact from './contact.service.js';
 import candidate from './candidate.service.js';
 import candidateShortVideo from './candidateShortVideo.service.js';
 import party from './party.service.js';
+import partyRecord from './partyRecord.service.js';
 import politician from './politician.service.js';
 import reaction from './reaction.service.js';
 import ranking from './ranking.service.js';
@@ -31,5 +32,6 @@ export default {
     record,
     sticker,
     state,
-    person
+    person,
+    partyRecord
 }

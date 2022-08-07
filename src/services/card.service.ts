@@ -26,7 +26,7 @@ async function createRandomNewCardsToUser (ownerId: number, amount: number) {
 
     console.log(`create ${amount} to ${ownerId}`)
 
-    const getCards = await cardModelService.getByRanking(1);
+    const getCards = await cardModelService.getByRankingWithRecords(1);
 
     const model = getCards.sort((a, b) => b.record.scoreTotal - a.record.scoreTotal);
 
@@ -103,6 +103,12 @@ async function getAllCardsFromUser (userId: number) {
     return cards;
 }
 
+async function getAllByOwner (ownerId: number) {
+    loggerUtils.log('service', 'getAllByOwnerAndAlbum');
+    const cards = await repo.getAllByOwner(ownerId);
+    return cards;
+}
+
 async function validateOwnership(cardId: number, ownerId: number) {
     const card = await validateOrCrash(cardId);
     if (card.ownerId !== ownerId) {
@@ -111,4 +117,12 @@ async function validateOwnership(cardId: number, ownerId: number) {
     return card;
 }
 
-export default { validateOrCrash, createRandomNewCardsToUser, pasteAll, pasteOrCrash, getAllCardsFromUser, validateOwnership };
+export default { 
+    validateOrCrash, 
+    createRandomNewCardsToUser, 
+    pasteAll, 
+    pasteOrCrash, 
+    getAllCardsFromUser, 
+    validateOwnership,
+    getAllByOwner
+};

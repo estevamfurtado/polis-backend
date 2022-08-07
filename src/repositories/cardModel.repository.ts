@@ -23,13 +23,28 @@ async function update (id: number, cardModel: UpdateInput) {
 async function getByRanking(rankingId: number) {
     return await db.findMany({
         where: {record: {ranking: {id: rankingId}}},
-        include: {record: true},
+        include: {
+            record: {select: {id: true}},
+            stickers: {select: {id: true}}
+        },
     });
 }
+
+async function getByRankingWithRecords(rankingId: number) {
+    return await db.findMany({
+        where: {record: {ranking: {id: rankingId}}},
+        include: {
+            record: true,
+            stickers: {select: {id: true}}
+        },
+    });
+}
+
 
 export default {
     create,
     get,
     update,
-    getByRanking
+    getByRanking,
+    getByRankingWithRecords
 }

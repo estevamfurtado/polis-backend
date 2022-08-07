@@ -24,6 +24,16 @@ async function getByAbbreviation (abbreviation: string) {
     return await db.findFirst({where: {abbreviation}});
 }
 
+async function getAll () {
+    return await db.findMany({
+        include: {
+            politicians: {select: {id: true}},
+            records: {select: {id: true}},
+            candidates: {select: {id: true}},
+        }
+    });
+}
+
 export default {
     create,
     get: {
@@ -32,5 +42,6 @@ export default {
             whereAbbreviation: getByAbbreviation
         }
     },
-    update
+    update,
+    getAll
 }

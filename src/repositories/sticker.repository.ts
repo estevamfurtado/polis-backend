@@ -20,8 +20,21 @@ async function update (id: number, sticker: UpdateInput) {
     return await db.update({where: {id}, data: sticker});
 }
 
+async function getAllByAlbumId (albumId: number) {
+    return await db.findMany({
+        where: {
+            page: {album: {id: albumId}}
+        },
+        include: {
+            page: {select: {id: true}},
+            entryInPage: {select: {id: true}}
+        }
+});
+}
+
 export default {
     create,
     get,
-    update
+    update,
+    getAllByAlbumId
 }

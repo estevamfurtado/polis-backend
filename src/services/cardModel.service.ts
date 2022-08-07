@@ -29,4 +29,9 @@ async function getByRanking (rankingId: number) {
     return result;
 }
 
-export default { validateOrCrash, createByRankingRecord, getByRanking };
+async function getByRankingWithRecords (rankingId: number) {
+    const result = await repo.getByRankingWithRecords(rankingId);
+    return result;
+}
+
+export default { validateOrCrash, createByRankingRecord, getByRanking, getByRankingWithRecords };

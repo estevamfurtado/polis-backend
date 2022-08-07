@@ -2,6 +2,7 @@ import repos from '../repositories/index.js';
 import AppError from '../utils/errors/error.utils.js';
 import Prisma from '@prisma/client';
 import cardModelService from './cardModel.service.js';
+import pageService from './page.service.js';
 
 type Element = Prisma.Sticker;
 type CreateInput = Prisma.Prisma.StickerCreateInput;
@@ -17,11 +18,17 @@ async function validateOrCrash (id: number) : Promise<Element> {
     return result;
 }
 
-async function createPartyPageBaseStickers(albumId: number, pageId: number, orderedRecords: any[]) {
+async function createPartyPageBaseStickers(albumId: number, pageId: number, records: Prisma.Record[]) {
+    
+    const orderedRecords = records.sort((a, b) => a.scoreTotal - b.scoreTotal);
+    
     let predecessorId = null;
     let identifier = 1;
     for (const record of orderedRecords) {
         const sticker = await createChainedPartyPageBaseSticker(pageId, record, identifier, predecessorId)
+        if (identifier === 1) {
+            await repo.update(sticker.id, {entryInPage: {connect: {id: pageId}}})
+        }
         predecessorId = sticker.id;
         identifier++;
     }
@@ -34,6 +41,7 @@ async function createChainedPartyPageBaseSticker(pageId: number, record: any, id
     } : {}
     
     const cardModel = await cardModelService.createByRankingRecord(record);
+    
     const sticker = await repo.create({
         page: {connect: {id: pageId}},
         card: {connect: {id: cardModel.id}},
@@ -43,4 +51,8 @@ async function createChainedPartyPageBaseSticker(pageId: number, record: any, id
     return sticker;
 }
 
-export default { validateOrCrash, createPartyPageBaseStickers };
+async function getStickersByAlbum(albumId: number) {
+    return await repo.getAllByAlbumId(albumId);
+}
+
+export default { validateOrCrash, createPartyPageBaseStickers, getStickersByAlbum };

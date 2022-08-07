@@ -16,4 +16,14 @@ async function validateOrCrash (id: number) : Promise<Element> {
     return result;
 }
 
-export default { validateOrCrash };
+async function createManyEach (records: CreateInput[]) {
+    for (const record of records) {
+        await repo.create(record);
+    }
+}
+
+async function getByRanking (rankingId: number) {
+    return await repo.getByRanking(rankingId);
+}
+
+export default { validateOrCrash, createManyEach, getByRanking };

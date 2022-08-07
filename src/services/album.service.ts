@@ -30,9 +30,10 @@ async function createOrCrash (album: CreateInput) {
 }
 
 async function createLastYear () {
-    const ranking = await rankingService.validateOrCrashByYear(_LAST_YEAR);
+    console.log('creating album');
     const album = await createOrCrash({year: _LAST_YEAR, title: 'Casa do Baralho', description: ''});
-    await pageService.createAlbumBasePages(album.id, ranking.id);
+    console.log('created album');
+    await pageService.createAlbumBasePages(album.id, _LAST_YEAR);
 }
 
 
@@ -42,14 +43,15 @@ async function getByYear (year: number) : Promise<Element> {
     return result;
 }
 
-async function getLastAlbumWithDetails () {
-    const album = await repo.getByYear(_LAST_YEAR);
+
+async function getLastAlbum() {
+    const album = await repo.getAlbumWithPageIds(_LAST_YEAR);
     return album;
 }
 
 export default { 
     validateOrCrash, 
     getByYear, 
-    getLastAlbumWithDetails,
-    createLastYear
+    createLastYear,
+    getLastAlbum
 };

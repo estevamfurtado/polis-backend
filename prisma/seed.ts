@@ -10,30 +10,23 @@ const prisma = new Prisma.PrismaClient();
 
 async function main() {
 
-    console.log(`# states: ${states.length}`)
-    console.log(`# parties: ${parties.length}`)
-    console.log(`# deputados: ${deputados.length}`)
-    console.log(`# rankings: ${rankings.length}`)
-    console.log(`# records: ${records.length}`)
-
-    console.log('Seeding database...');
-
-    console.log('>> Creating States...');
+    // console.log('>> Creating States...');
     await prisma.state.createMany({ data: states });
 
-    console.log('>> Creating Parties...');
+    // console.log('>> Creating Parties...');
     await prisma.party.createMany({ data: parties });
 
-    console.log('>> Creating Politicians...');
+    // console.log('>> Creating Politicians...');
     await addDeputadosToDatabase();
 
-    console.log('>> Creating Rankings...');
-    await prisma.ranking.createMany({ data: rankings });
+    // console.log('>> Creating Rankings...');
+    await services.ranking.createMany(rankings);
 
-    console.log('>> Creating Records...');
-    await addRecordsToDatabase();
+    // console.log('>> Creating Records...');
+    await services.record.createManyEach(records);
+    await services.partyRecord.updateAllScores();
 
-    console.log('>> Creating Album...')
+    // console.log('>> Creating Album...')
     await services.album.createLastYear();
 
     console.log('Seeding database... done!');
@@ -41,58 +34,22 @@ async function main() {
 
 
 async function addDeputadosToDatabase() {
-    let i = 0;
-    const errors = {};
     for (const deputado of deputados) {
-        const response = await addDeputadoToDatabase(deputado, i);
-        if (response !== true) {
-            if (!errors[response.error.code]) {
-                errors[response.error.code] = { ...response.error, counter: 0, deputados: [] };
-            }
-            errors[response.error.code].counter++;
-            errors[response.error.code].deputados.push(response.deputado.name);
-        }
-        i++;
+        const response = await addDeputadoToDatabase(deputado);
     }
-    parser.json.write(errors, paths.json.errors.seedDeputados);
 }
 
-async function addDeputadoToDatabase(deputado: Prisma.Prisma.PersonCreateInput, i: number) {
+async function addDeputadoToDatabase(deputado: Prisma.Prisma.PersonCreateInput) {
     try {
         await prisma.person.create({ data: deputado });
         return true;
     } catch (error) {
-        return { error, deputado, i };
+        console.log('erro salvando deputado')
+        console.log(deputado)
     }
 }
 
-async function addRecordsToDatabase() {
-    let i = 0;
-    const errors = {};
-    for (const record of records) {
-        const response = await addRecordToDatabase(record, i);
-        if (response !== true) {
-            if (!errors[response.error.code]) {
-                console.log('');
-                console.log('---------> ERROR');
-                console.log(response.error);
-                errors[response.error.code] = { ...response.error, counter: 0, records: [] };
-            }
-            errors[response.error.code].counter++;
-        }
-        i++;
-    }
-    parser.json.write(errors, paths.json.errors.seedRecords);
-}
 
-async function addRecordToDatabase(record: Prisma.Prisma.RecordCreateInput, i: number) {
-    try {
-        await prisma.record.create({ data: record });
-        return true;
-    } catch (error) {
-        return { error, record, i };
-    }
-}
 
 main()
     .catch(console.error)

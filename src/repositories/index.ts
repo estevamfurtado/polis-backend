@@ -6,6 +6,7 @@ import contact from './contact.repository.js';
 import candidate from './candidate.repository.js';
 import candidateShortVideo from './candidateShortVideo.repository.js';
 import party from './party.repository.js';
+import partyRecord from './partyRecord.repository.js';
 import politician from './politician.repository.js';
 import reaction from './reaction.repository.js';
 import ranking from './ranking.repository.js';
@@ -29,5 +30,6 @@ export default {
     record,
     sticker,
     state,
-    person
+    person,
+    partyRecord
 }

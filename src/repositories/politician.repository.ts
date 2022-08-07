@@ -20,8 +20,19 @@ async function update (id: number, politician: UpdateInput) {
     return await db.update({where: {id}, data: politician});
 }
 
+async function getAll () {
+    return await db.findMany({
+        include: {
+            records: {
+                select: {id: true},
+            }
+        }
+    });
+}
+
 export default {
     create,
     get,
-    update
+    update,
+    getAll
 }

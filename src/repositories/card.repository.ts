@@ -73,5 +73,5 @@ export default {
     getWithAlbum,
     getAllByOwner,
     getAllByOwnerWithDetails,
-    getPastedByOwnerIdModelId
+    getPastedByOwnerIdModelId,
 }

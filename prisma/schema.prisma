@@ -81,7 +81,8 @@ model Party {
   politicians Politician[]
   candidates  Candidate[]
 
-  records Record[]
+  records     Record[]
+  PartyRecord PartyRecord[]
 }
 
 model Contact {
@@ -181,9 +182,10 @@ model Ranking {
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now())
 
-  year    Int      @unique
-  title   String
-  records Record[]
+  year         Int           @unique
+  title        String
+  records      Record[]
+  partyRecords PartyRecord[]
 }
 
 model Record {
@@ -200,6 +202,9 @@ model Record {
 
   ranking   Ranking @relation(fields: [rankingId], references: [id])
   rankingId Int
+
+  partyRecord   PartyRecord @relation(fields: [partyRecordId], references: [id])
+  partyRecordId Int
 
   party             Party?  @relation(fields: [partyAbbreviation], references: [abbreviation])
   partyAbbreviation String?
@@ -246,6 +251,47 @@ model Record {
   cardModel CardModel?
 
   @@unique([rankingId, politicianId])
+}
+
+model PartyRecord {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+
+  ranking           Ranking      @relation(fields: [rankingYear], references: [year])
+  rankingYear       Int
+  party             Party        @relation(fields: [partyAbbreviation], references: [abbreviation])
+  partyAbbreviation String
+  records           Record[]
+  scores            PartyScore[]
+
+  @@unique([rankingYear, partyAbbreviation])
+}
+
+model PartyScore {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+
+  type       PartyScoreTypes
+  totalScore Float           @default(0)
+  count      Int?            @default(0)
+  average    Float?          @default(0)
+
+  partyRecordId Int
+  partyRecord   PartyRecord @relation(fields: [partyRecordId], references: [id])
+
+  @@unique([partyRecordId, type])
+}
+
+enum PartyScoreTypes {
+  scorePresence
+  scoreSaveQuota
+  scoreProcess
+  scoreInternal
+  scorePrivileges
+  scoreWastage
+  scoreTotal
 }
 
 model Album {

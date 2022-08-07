@@ -24,6 +24,10 @@ async function validateAbbreviationOrCrash (abbreviation: string) : Promise<Elem
     return result;
 }
 
+async function getAll () {
+    return repo.getAll();
+}
+
 
 export default { 
     validate: {
@@ -33,5 +37,6 @@ export default {
         byAbbreviation: {
             orCrash: validateAbbreviationOrCrash
         }
-    }
+    },
+    getAll
 };

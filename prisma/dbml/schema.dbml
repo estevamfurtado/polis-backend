@@ -59,6 +59,7 @@ Table Party {
   politicians Politician [not null]
   candidates Candidate [not null]
   records Record [not null]
+  PartyRecord PartyRecord [not null]
 }
 
 Table Contact {
@@ -143,6 +144,7 @@ Table Ranking {
   year Int [unique, not null]
   title String [not null]
   records Record [not null]
+  partyRecords PartyRecord [not null]
 }
 
 Table Record {
@@ -156,6 +158,8 @@ Table Record {
   sourceName String
   ranking Ranking [not null]
   rankingId Int [not null]
+  partyRecord PartyRecord [not null]
+  partyRecordId Int [not null]
   party Party
   partyAbbreviation String
   state State
@@ -194,6 +198,38 @@ Table Record {
 
   indexes {
     (rankingId, politicianId) [unique]
+  }
+}
+
+Table PartyRecord {
+  id Int [pk, increment]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [default: `now()`, not null]
+  ranking Ranking [not null]
+  rankingYear Int [not null]
+  party Party [not null]
+  partyAbbreviation String [not null]
+  records Record [not null]
+  scores PartyScore [not null]
+
+  indexes {
+    (rankingYear, partyAbbreviation) [unique]
+  }
+}
+
+Table PartyScore {
+  id Int [pk, increment]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [default: `now()`, not null]
+  type PartyScoreTypes [not null]
+  totalScore Float [not null, default: 0]
+  count Int [default: 0]
+  average Float [default: 0]
+  partyRecordId Int [not null]
+  partyRecord PartyRecord [not null]
+
+  indexes {
+    (partyRecordId, type) [unique]
   }
 }
 
@@ -279,6 +315,16 @@ Table Card {
   ownerId Int
 }
 
+Enum PartyScoreTypes {
+  scorePresence
+  scoreSaveQuota
+  scoreProcess
+  scoreInternal
+  scorePrivileges
+  scoreWastage
+  scoreTotal
+}
+
 Enum EconomicClass {
   A
   B
@@ -333,9 +379,17 @@ Ref: Record.politicianId > Politician.id
 
 Ref: Record.rankingId > Ranking.id
 
+Ref: Record.partyRecordId > PartyRecord.id
+
 Ref: Record.partyAbbreviation > Party.abbreviation
 
 Ref: Record.stateAbbreviation > State.abbreviation
+
+Ref: PartyRecord.rankingYear > Ranking.year
+
+Ref: PartyRecord.partyAbbreviation > Party.abbreviation
+
+Ref: PartyScore.partyRecordId > PartyRecord.id
 
 Ref: Album.entryPageId - Page.id
 

@@ -6,6 +6,8 @@ import Prisma from '@prisma/client';
 import cardModelService from './cardModel.service.js';
 import politicalPartyService from './party.service.js';
 import stickerService from './sticker.service.js';
+import partyRecordService from './partyRecord.service.js';
+import albumRepository from '../repositories/album.repository.js';
 
 type Element = Prisma.Page;
 type CreateInput = Prisma.Prisma.PageCreateInput;
@@ -21,32 +23,49 @@ async function validateOrCrash (id: number) : Promise<Element> {
     return result;
 }
 
-async function createAlbumBasePages(albumId: number, rankingId: number) {
-    const parties = await politicalPartyService.getOrderedByRanking(rankingId);
+
+async function createAlbumBasePages(albumId: number, year: number) {
+
+    console.log('creating pages');
+
+    const partyRecords = await partyRecordService.getOrderedByTotalScores(year);
     let predecessorId = null;
-
-    for (const party of parties) {
-        const page = await createChainedPartyPage(albumId, party, predecessorId);
-        predecessorId = page.id;
-    }
-}
-
-async function createChainedPartyPage(albumId: number, party: any, predecessorId?: number) {
     
-    const predecessorObj = predecessorId ? {
-        predecessor: {connect: {id: predecessorId}}
-    } : {}
+    console.log(partyRecords.length);
 
-    const page = await repo.create({
-        album: {connect: {id: albumId}},
-        title: party.name,
-        description: '',
-        backgroundColor: party.color ? party.color : '#ffffff',
-        ...predecessorObj
-    });
+    let first = true;
+    for (const record of partyRecords) {
 
-    await stickerService.createPartyPageBaseStickers(albumId, page.id, party.rankingRecords);
-    return page;
+        const predecessorObj = predecessorId ? {predecessor: {connect: {id: predecessorId}}} : {}
+
+        const create = {
+            title: `${record.party.name} - ${record.party.abbreviation}`,
+            description: '',
+            backgroundColor: record.party.mainColor ? record.party.mainColor : '#ffffff',
+            album: {connect: {id: albumId}},
+            ...predecessorObj
+        }
+
+        const page = await repo.create(create);
+        predecessorId = page.id;
+
+        if (first) {
+            await albumRepository.update(albumId, {entryPage: {connect: {id: page.id}}});
+            first = false;
+        }
+
+        await stickerService.createPartyPageBaseStickers(albumId, page.id, record.records);
+    }
+
 }
 
-export default { validateOrCrash, createAlbumBasePages };
+async function getPagesByAlbum (albumId: number) {
+    const result = await repo.getPagesWithStickersIds(albumId);
+    return result;
+}
+
+export default { 
+    validateOrCrash, 
+    createAlbumBasePages,
+    getPagesByAlbum
+};

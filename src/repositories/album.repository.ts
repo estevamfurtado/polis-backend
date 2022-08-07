@@ -27,19 +27,11 @@ async function getByYear (year: number) {
     );
 }
 
-async function getAlbumWithDetails (year: number) {
+async function getAlbumWithPageIds (year: number) {
     const userAlbum = await db.findFirst({
         where: {year},
         include: {
-            pages: {
-                include: {
-                    stickers: {
-                        include: {
-                            card: true
-                        }
-                    }
-                }
-            }
+            pages: {select: {id: true}},
         }
     });
     return userAlbum;
@@ -50,5 +42,5 @@ export default {
     get,
     update,
     getByYear,
-    getAlbumWithDetails
+    getAlbumWithPageIds
 }
