@@ -21,7 +21,6 @@ model State {
   abbreviation String       @id @unique
   people       Person[]
   politicians  Politician[]
-  candidates   Candidate[]
   records      Record[]
 }
 
@@ -43,7 +42,6 @@ model Person {
   skinColor     SkinColor?
 
   voteStateAbbreviation String?
-  contact               Contact?
 
   diplomaticAxis Int?
   economicAxis   Int?
@@ -52,13 +50,9 @@ model Person {
 
   voteState State? @relation(fields: [voteStateAbbreviation], references: [abbreviation])
 
-  reactions Reaction[]
-
-  politicianProfile Politician?
-  candidateProfile  Candidate?
-
-  deck  Card[]
-  packs Int    @default(18)
+  deck       Card[]
+  packs      Int         @default(18)
+  politician Politician?
 }
 
 model Party {
@@ -76,68 +70,9 @@ model Party {
   secondaryColor String?
   about          String?
 
-  contact Contact?
-
-  politicians Politician[]
-  candidates  Candidate[]
-
-  records     Record[]
-  PartyRecord PartyRecord[]
-}
-
-model Contact {
-  id        Int      @id @default(autoincrement())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now())
-
-  phone     String?
-  email     String?
-  address   String?
-  twitter   String?
-  facebook  String?
-  instagram String?
-  linkedin  String?
-  youtube   String?
-  website   String?
-
-  person   Person? @relation(fields: [personId], references: [id])
-  personId Int?    @unique
-
-  party             Party?  @relation(fields: [partyAbbreviation], references: [abbreviation])
-  partyAbbreviation String? @unique
-}
-
-model Candidate {
-  id        Int      @id @default(autoincrement())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now())
-
-  name        String
-  description String
-  person      Person @relation(fields: [personId], references: [id])
-  personId    Int    @unique
-
-  party             Party  @relation(fields: [partyAbbreviation], references: [abbreviation])
-  partyAbbreviation String
-
-  state             State  @relation(fields: [stateAbbreviation], references: [abbreviation])
-  stateAbbreviation String
-
-  reactions   Reaction[]
-  shortVideos CandidateShortVideo[]
-}
-
-model CandidateShortVideo {
-  id        Int      @id @default(autoincrement())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now())
-
-  title     String
-  url       String
-  thumbnail String?
-
-  candidate   Candidate @relation(fields: [candidateId], references: [id])
-  candidateId Int       @unique
+  politicians  Politician[]
+  records      Record[]
+  partyRecords PartyRecord[]
 }
 
 model Politician {
@@ -159,22 +94,6 @@ model Politician {
 
   imageUrl String
   records  Record[]
-}
-
-model Reaction {
-  id        Int      @id @default(autoincrement())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now())
-
-  type ReactionTypes
-
-  person   Person @relation(fields: [personId], references: [id])
-  personId Int
-
-  candidate   Candidate @relation(fields: [candidateId], references: [id])
-  candidateId Int
-
-  comment String?
 }
 
 model Ranking {
@@ -248,7 +167,8 @@ model Record {
   parliamentarianStaffMaxYear Float?
   parliamentarianQuotaMaxYear Float?
 
-  cardModel CardModel?
+  stickerId Int?     @unique
+  Sticker   Sticker?
 
   @@unique([rankingId, politicianId])
 }
@@ -258,40 +178,45 @@ model PartyRecord {
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now())
 
-  ranking           Ranking      @relation(fields: [rankingYear], references: [year])
-  rankingYear       Int
-  party             Party        @relation(fields: [partyAbbreviation], references: [abbreviation])
+  ranking     Ranking @relation(fields: [rankingYear], references: [year])
+  rankingYear Int
+
+  party             Party  @relation(fields: [partyAbbreviation], references: [abbreviation])
   partyAbbreviation String
-  records           Record[]
-  scores            PartyScore[]
+
+  records Record[]
+
+  scorePresenceSum   Float @default(0)
+  scorePresenceCount Int   @default(0)
+  scorePresence      Float @default(0)
+
+  scoreSaveQuotaSum   Float @default(0)
+  scoreSaveQuotaCount Int   @default(0)
+  scoreSaveQuota      Float @default(0)
+
+  scoreProcessSum   Float @default(0)
+  scoreProcessCount Int   @default(0)
+  scoreProcess      Float @default(0)
+
+  scoreInternalSum   Float @default(0)
+  scoreInternalCount Int   @default(0)
+  scoreInternal      Float @default(0)
+
+  scorePrivilegesSum   Float @default(0)
+  scorePrivilegesCount Int   @default(0)
+  scorePrivileges      Float @default(0)
+
+  scoreWastageSum   Float @default(0)
+  scoreWastageCount Int   @default(0)
+  scoreWastage      Float @default(0)
+
+  scoreTotalSum   Float @default(0)
+  scoreTotalCount Int   @default(0)
+  scoreTotal      Float @default(0)
+
+  sticker Sticker?
 
   @@unique([rankingYear, partyAbbreviation])
-}
-
-model PartyScore {
-  id        Int      @id @default(autoincrement())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now())
-
-  type       PartyScoreTypes
-  totalScore Float           @default(0)
-  count      Int?            @default(0)
-  average    Float?          @default(0)
-
-  partyRecordId Int
-  partyRecord   PartyRecord @relation(fields: [partyRecordId], references: [id])
-
-  @@unique([partyRecordId, type])
-}
-
-enum PartyScoreTypes {
-  scorePresence
-  scoreSaveQuota
-  scoreProcess
-  scoreInternal
-  scorePrivileges
-  scoreWastage
-  scoreTotal
 }
 
 model Album {
@@ -306,9 +231,7 @@ model Album {
   coverUrl String?
   thumbUrl String?
 
-  entryPage   Page?  @relation(name: "EntryPage", fields: [entryPageId], references: [id])
-  entryPageId Int?   @unique
-  pages       Page[] @relation("Pages")
+  pages Page[]
 
   @@unique([year, title])
 }
@@ -322,17 +245,11 @@ model Page {
   description     String
   backgroundColor String?
 
-  successorId Int?  @unique
-  successor   Page? @relation("PagesOrder", fields: [successorId], references: [id])
-  predecessor Page? @relation("PagesOrder")
-
   albumId      Int
-  entryInAlbum Album? @relation("EntryPage")
-  album        Album  @relation(name: "Pages", fields: [albumId], references: [id])
+  album        Album @relation(fields: [albumId], references: [id])
+  orderInAlbum Int
 
-  entrySticker   Sticker?  @relation(name: "EntrySticker", fields: [entryStickerId], references: [id])
-  entryStickerId Int?      @unique
-  stickers       Sticker[] @relation("Stickers")
+  stickers Sticker[]
 
   @@unique([albumId, title])
 }
@@ -342,35 +259,26 @@ model Sticker {
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now())
 
-  pageId Int
+  orderInPage Int
+  pageId      Int
+  page        Page @relation(fields: [pageId], references: [id])
 
-  card       CardModel @relation(fields: [cardId], references: [id])
-  cardId     Int
+  type         StickerTypes             @default(politician)
+  availability StickerAvailabilityTypes @default(easy)
+
   identifier String
+  title      String
+  imageUrl   String
 
-  successorId Int?     @unique
-  successor   Sticker? @relation("StickersOrder", fields: [successorId], references: [id])
-  predecessor Sticker? @relation("StickersOrder")
+  politicianRecord   Record? @relation(fields: [politicianRecordId], references: [id])
+  politicianRecordId Int?    @unique
 
-  entryInPage Page? @relation("EntrySticker")
-  page        Page  @relation(name: "Stickers", fields: [pageId], references: [id])
+  partyRecord   PartyRecord? @relation(fields: [partyRecordId], references: [id])
+  partyRecordId Int?         @unique
+
+  Card Card[]
 
   @@unique([pageId, identifier])
-}
-
-model CardModel {
-  id        Int      @id @default(autoincrement())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now())
-
-  record   Record? @relation(fields: [recordId], references: [id])
-  recordId Int?    @unique
-
-  variant  String @default("normal")
-  imageUrl String
-
-  stickers Sticker[]
-  cards    Card[]
 }
 
 model Card {
@@ -378,10 +286,11 @@ model Card {
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now())
 
-  model   CardModel @relation(fields: [modelId], references: [id])
-  modelId Int
+  sticker   Sticker @relation(fields: [stickerId], references: [id])
+  stickerId Int
 
   isPasted Boolean @default(false)
+  isNew    Boolean @default(false)
 
   owner   Person? @relation(fields: [ownerId], references: [id])
   ownerId Int?
@@ -413,4 +322,26 @@ enum Sex {
 enum ReactionTypes {
   like
   dislike
+}
+
+enum StickerAvailabilityTypes {
+  easy
+  medium
+  rare
+}
+
+enum StickerTypes {
+  party
+  politician
+  moment
+}
+
+enum PartyScoreTypes {
+  scorePresence
+  scoreSaveQuota
+  scoreProcess
+  scoreInternal
+  scorePrivileges
+  scoreWastage
+  scoreTotal
 }

@@ -18,14 +18,17 @@ async function validateOrCrash (id: number) : Promise<Element> {
     return result;
 }
 
-async function createPartyPageBaseStickers(albumId: number, pageId: number, records: Prisma.Record[]) {
+async function createPartyPageBaseStickers(albumId: number, pageId: number, records: Prisma.Record[], partyAbbreviation?: string) {
     
     const orderedRecords = records.sort((a, b) => a.scoreTotal - b.scoreTotal);
     
     let predecessorId = null;
     let identifier = 1;
+
+
+
     for (const record of orderedRecords) {
-        const sticker = await createChainedPartyPageBaseSticker(pageId, record, identifier, predecessorId)
+        const sticker = await createChainedPoliticianPageBaseSticker(pageId, record, identifier, predecessorId)
         if (identifier === 1) {
             await repo.update(sticker.id, {entryInPage: {connect: {id: pageId}}})
         }
@@ -34,7 +37,9 @@ async function createPartyPageBaseStickers(albumId: number, pageId: number, reco
     }
 }
 
-async function createChainedPartyPageBaseSticker(pageId: number, record: any, identifier: number, predecessorId?: number) {
+async function createPartySpecialSticker
+
+async function createChainedPoliticianPageBaseSticker(pageId: number, record: any, identifier: number, predecessorId?: number) {
     
     const predecessorObj = predecessorId ? {
         predecessor: {connect: {id: predecessorId}}

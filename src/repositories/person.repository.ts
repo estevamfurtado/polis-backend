@@ -1,5 +1,6 @@
 import pkg from '@prisma/client';
 import database from "../database.js";
+import errorUtils from '../utils/errors/error.utils.js';
 import loggerUtils from '../utils/logger.utils.js';
 
 const db = database.prisma.person;
@@ -9,9 +10,13 @@ export type UpdateInput = pkg.Prisma.PersonUpdateInput
 
 
 async function create (person: CreateInput) {
-    loggerUtils.log('repository', 'Creating person');
-    const response = await db.create({data: person});
-    return response;
+    try {
+        loggerUtils.log('repository', 'Creating person');
+        const response = await db.create({data: person});
+        return response;
+    } catch (error) {
+        throw errorUtils.wrongSchema('Não foi possível criar o usuário.');
+    }
 }
 
 async function get (id: number) {

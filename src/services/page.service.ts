@@ -54,7 +54,7 @@ async function createAlbumBasePages(albumId: number, year: number) {
             first = false;
         }
 
-        await stickerService.createPartyPageBaseStickers(albumId, page.id, record.records);
+        await stickerService.createPartyPageBaseStickers(albumId, page.id, record.records, record.partyAbbreviation);
     }
 
 }

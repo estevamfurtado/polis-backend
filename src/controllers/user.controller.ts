@@ -5,6 +5,10 @@ async function putUser (req: Request, res: Response) {
 }
 
 async function getUser (req: Request, res: Response) {
+    const userId = res.locals.user.id;
+    const user = await services.person.get.byId.orCrash(userId);
+    delete user.password;
+    res.send(user);
 }
 
 async function putCandidateProfile (req: Request, res: Response) {

@@ -20,7 +20,7 @@ async function getRanking (req: Request, res: Response) {
     const statesByAbbreviation = arrayToObject(statesArray, "abbreviation");
     const statesById = arrayToObject(statesArray, "id");
     const partyRecords = arrayToObject(partyRecordsArray, "id");
-    const cardModel = arrayToObject(cardModelArray, "id");
+    const cardModels = arrayToObject(cardModelArray, "id");
 
     const sendData = {
         ranking,
@@ -29,7 +29,7 @@ async function getRanking (req: Request, res: Response) {
         parties: {id: partiesById, abbreviation: partiesByAbbreviation},
         states: {id: statesById, abbreviation: statesByAbbreviation},
         partyRecords,
-        cardModel,
+        cardModels,
     };
 
     res.send(sendData);

@@ -1,3 +1,4 @@
+import loggerUtils from "../logger.utils.js";
 
 type AppErrorTypes = "conflict" | "not_found" | "unauthorized" | "wrong_schema" | "internal" | "forbidden";
 
@@ -26,6 +27,7 @@ function any (code?: number, type?: string, message?: string): AppError {
 }
 
 function returnErrorFromType (error: AppError, message: string): AppError {
+  loggerUtils.log('error', `${error.type} > ${message}`);
   return { type: error.type, message: message, code: error.code };
 }
 

@@ -10,24 +10,24 @@ const prisma = new Prisma.PrismaClient();
 
 async function main() {
 
-    // console.log('>> Creating States...');
-    await prisma.state.createMany({ data: states });
+    // // console.log('>> Creating States...');
+    // await prisma.state.createMany({ data: states });
 
-    // console.log('>> Creating Parties...');
-    await prisma.party.createMany({ data: parties });
+    // // console.log('>> Creating Parties...');
+    // await prisma.party.createMany({ data: parties });
 
-    // console.log('>> Creating Politicians...');
-    await addDeputadosToDatabase();
+    // // console.log('>> Creating Politicians...');
+    // await addDeputadosToDatabase();
 
-    // console.log('>> Creating Rankings...');
-    await services.ranking.createMany(rankings);
+    // // console.log('>> Creating Rankings...');
+    // await services.ranking.createMany(rankings);
 
-    // console.log('>> Creating Records...');
-    await services.record.createManyEach(records);
-    await services.partyRecord.updateAllScores();
+    // // console.log('>> Creating Records...');
+    // await services.record.createManyEach(records);
+    // await services.partyRecord.updateAllScores();
 
-    // console.log('>> Creating Album...')
-    await services.album.createLastYear();
+    // // console.log('>> Creating Album...')
+    // await services.album.createLastYear();
 
     console.log('Seeding database... done!');
 }

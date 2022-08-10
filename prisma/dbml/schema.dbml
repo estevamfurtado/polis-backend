@@ -10,7 +10,6 @@ Table State {
   abbreviation String [pk, unique]
   people Person [not null]
   politicians Politician [not null]
-  candidates Candidate [not null]
   records Record [not null]
 }
 
@@ -29,17 +28,14 @@ Table Person {
   economicClass EconomicClass
   skinColor SkinColor
   voteStateAbbreviation String
-  contact Contact
   diplomaticAxis Int
   economicAxis Int
   civilAxis Int
   socialAxis Int
   voteState State
-  reactions Reaction [not null]
-  politicianProfile Politician
-  candidateProfile Candidate
   deck Card [not null]
   packs Int [not null, default: 18]
+  politician Politician
 }
 
 Table Party {
@@ -55,57 +51,9 @@ Table Party {
   mainColor String
   secondaryColor String
   about String
-  contact Contact
   politicians Politician [not null]
-  candidates Candidate [not null]
   records Record [not null]
-  PartyRecord PartyRecord [not null]
-}
-
-Table Contact {
-  id Int [pk, increment]
-  createdAt DateTime [default: `now()`, not null]
-  updatedAt DateTime [default: `now()`, not null]
-  phone String
-  email String
-  address String
-  twitter String
-  facebook String
-  instagram String
-  linkedin String
-  youtube String
-  website String
-  person Person
-  personId Int [unique]
-  party Party
-  partyAbbreviation String [unique]
-}
-
-Table Candidate {
-  id Int [pk, increment]
-  createdAt DateTime [default: `now()`, not null]
-  updatedAt DateTime [default: `now()`, not null]
-  name String [not null]
-  description String [not null]
-  person Person [not null]
-  personId Int [unique, not null]
-  party Party [not null]
-  partyAbbreviation String [not null]
-  state State [not null]
-  stateAbbreviation String [not null]
-  reactions Reaction [not null]
-  shortVideos CandidateShortVideo [not null]
-}
-
-Table CandidateShortVideo {
-  id Int [pk, increment]
-  createdAt DateTime [default: `now()`, not null]
-  updatedAt DateTime [default: `now()`, not null]
-  title String [not null]
-  url String [not null]
-  thumbnail String
-  candidate Candidate [not null]
-  candidateId Int [unique, not null]
+  partyRecords PartyRecord [not null]
 }
 
 Table Politician {
@@ -123,18 +71,6 @@ Table Politician {
   stateAbbreviation String [not null]
   imageUrl String [not null]
   records Record [not null]
-}
-
-Table Reaction {
-  id Int [pk, increment]
-  createdAt DateTime [default: `now()`, not null]
-  updatedAt DateTime [default: `now()`, not null]
-  type ReactionTypes [not null]
-  person Person [not null]
-  personId Int [not null]
-  candidate Candidate [not null]
-  candidateId Int [not null]
-  comment String
 }
 
 Table Ranking {
@@ -194,7 +130,8 @@ Table Record {
   parliamentarianStateCount Int
   parliamentarianStaffMaxYear Float
   parliamentarianQuotaMaxYear Float
-  cardModel CardModel
+  stickerId Int [unique]
+  Sticker Sticker
 
   indexes {
     (rankingId, politicianId) [unique]
@@ -210,26 +147,31 @@ Table PartyRecord {
   party Party [not null]
   partyAbbreviation String [not null]
   records Record [not null]
-  scores PartyScore [not null]
+  scorePresenceSum Float [not null, default: 0]
+  scorePresenceCount Int [not null, default: 0]
+  scorePresence Float [not null, default: 0]
+  scoreSaveQuotaSum Float [not null, default: 0]
+  scoreSaveQuotaCount Int [not null, default: 0]
+  scoreSaveQuota Float [not null, default: 0]
+  scoreProcessSum Float [not null, default: 0]
+  scoreProcessCount Int [not null, default: 0]
+  scoreProcess Float [not null, default: 0]
+  scoreInternalSum Float [not null, default: 0]
+  scoreInternalCount Int [not null, default: 0]
+  scoreInternal Float [not null, default: 0]
+  scorePrivilegesSum Float [not null, default: 0]
+  scorePrivilegesCount Int [not null, default: 0]
+  scorePrivileges Float [not null, default: 0]
+  scoreWastageSum Float [not null, default: 0]
+  scoreWastageCount Int [not null, default: 0]
+  scoreWastage Float [not null, default: 0]
+  scoreTotalSum Float [not null, default: 0]
+  scoreTotalCount Int [not null, default: 0]
+  scoreTotal Float [not null, default: 0]
+  sticker Sticker
 
   indexes {
     (rankingYear, partyAbbreviation) [unique]
-  }
-}
-
-Table PartyScore {
-  id Int [pk, increment]
-  createdAt DateTime [default: `now()`, not null]
-  updatedAt DateTime [default: `now()`, not null]
-  type PartyScoreTypes [not null]
-  totalScore Float [not null, default: 0]
-  count Int [default: 0]
-  average Float [default: 0]
-  partyRecordId Int [not null]
-  partyRecord PartyRecord [not null]
-
-  indexes {
-    (partyRecordId, type) [unique]
   }
 }
 
@@ -242,8 +184,6 @@ Table Album {
   description String [not null]
   coverUrl String
   thumbUrl String
-  entryPage Page
-  entryPageId Int [unique]
   pages Page [not null]
 
   indexes {
@@ -258,14 +198,9 @@ Table Page {
   title String [not null]
   description String [not null]
   backgroundColor String
-  successorId Int [unique]
-  successor Page
-  predecessor Page
   albumId Int [not null]
-  entryInAlbum Album
   album Album [not null]
-  entrySticker Sticker
-  entryStickerId Int [unique]
+  orderInAlbum Int [not null]
   stickers Sticker [not null]
 
   indexes {
@@ -277,52 +212,35 @@ Table Sticker {
   id Int [pk, increment]
   createdAt DateTime [default: `now()`, not null]
   updatedAt DateTime [default: `now()`, not null]
+  orderInPage Int [not null]
   pageId Int [not null]
-  card CardModel [not null]
-  cardId Int [not null]
-  identifier String [not null]
-  successorId Int [unique]
-  successor Sticker
-  predecessor Sticker
-  entryInPage Page
   page Page [not null]
+  type StickerTypes [not null, default: 'politician']
+  availability StickerAvailabilityTypes [not null, default: 'easy']
+  identifier String [not null]
+  title String [not null]
+  imageUrl String [not null]
+  politicianRecord Record
+  politicianRecordId Int [unique]
+  partyRecord PartyRecord
+  partyRecordId Int [unique]
+  Card Card [not null]
 
   indexes {
     (pageId, identifier) [unique]
   }
 }
 
-Table CardModel {
-  id Int [pk, increment]
-  createdAt DateTime [default: `now()`, not null]
-  updatedAt DateTime [default: `now()`, not null]
-  record Record
-  recordId Int [unique]
-  variant String [not null, default: 'normal']
-  imageUrl String [not null]
-  stickers Sticker [not null]
-  cards Card [not null]
-}
-
 Table Card {
   id Int [pk, increment]
   createdAt DateTime [default: `now()`, not null]
   updatedAt DateTime [default: `now()`, not null]
-  model CardModel [not null]
-  modelId Int [not null]
+  sticker Sticker [not null]
+  stickerId Int [not null]
   isPasted Boolean [not null, default: false]
+  isNew Boolean [not null, default: false]
   owner Person
   ownerId Int
-}
-
-Enum PartyScoreTypes {
-  scorePresence
-  scoreSaveQuota
-  scoreProcess
-  scoreInternal
-  scorePrivileges
-  scoreWastage
-  scoreTotal
 }
 
 Enum EconomicClass {
@@ -351,29 +269,35 @@ Enum ReactionTypes {
   dislike
 }
 
+Enum StickerAvailabilityTypes {
+  easy
+  medium
+  rare
+}
+
+Enum StickerTypes {
+  party
+  politician
+  moment
+}
+
+Enum PartyScoreTypes {
+  scorePresence
+  scoreSaveQuota
+  scoreProcess
+  scoreInternal
+  scorePrivileges
+  scoreWastage
+  scoreTotal
+}
+
 Ref: Person.voteStateAbbreviation > State.abbreviation
-
-Ref: Contact.personId - Person.id
-
-Ref: Contact.partyAbbreviation - Party.abbreviation
-
-Ref: Candidate.personId - Person.id
-
-Ref: Candidate.partyAbbreviation > Party.abbreviation
-
-Ref: Candidate.stateAbbreviation > State.abbreviation
-
-Ref: CandidateShortVideo.candidateId > Candidate.id
 
 Ref: Politician.personId - Person.id
 
 Ref: Politician.partyAbbreviation > Party.abbreviation
 
 Ref: Politician.stateAbbreviation > State.abbreviation
-
-Ref: Reaction.personId > Person.id
-
-Ref: Reaction.candidateId > Candidate.id
 
 Ref: Record.politicianId > Politician.id
 
@@ -389,24 +313,14 @@ Ref: PartyRecord.rankingYear > Ranking.year
 
 Ref: PartyRecord.partyAbbreviation > Party.abbreviation
 
-Ref: PartyScore.partyRecordId > PartyRecord.id
+Ref: Page.albumId > Album.id
 
-Ref: Album.entryPageId - Page.id
+Ref: Sticker.pageId > Page.id
 
-Ref: Page.successorId - Page.id
+Ref: Sticker.politicianRecordId - Record.id
 
-Ref: Page.albumId - Album.id
+Ref: Sticker.partyRecordId - PartyRecord.id
 
-Ref: Page.entryStickerId - Sticker.id
-
-Ref: Sticker.cardId > CardModel.id
-
-Ref: Sticker.successorId - Sticker.id
-
-Ref: Sticker.pageId - Page.id
-
-Ref: CardModel.recordId - Record.id
-
-Ref: Card.modelId > CardModel.id
+Ref: Card.stickerId > Sticker.id
 
 Ref: Card.ownerId > Person.id

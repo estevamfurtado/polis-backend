@@ -22,6 +22,7 @@ async function signUp (data: SignUp, referralId?: number) {
 
     data.cpf = data.cpf.replace(/\./g, '').replace(/-/g, '');
     data.password = crypt.bcrypt.encrypt(data.password);
+    data.birthDate = new Date(data.birthDate);
 
     await personService.get.byCpf.andCrash(data.cpf);
     
