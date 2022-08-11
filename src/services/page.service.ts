@@ -34,7 +34,8 @@ async function createAlbumPages(year: number) {
 
 async function createPage (record: (PartyRecord & {party: Party} & {records: (Record & {politician: Politician})[]}), orderInAlbum: number) {
     const create = {
-        title: `${record.party.name} - ${record.party.abbreviation}`,
+        badge: `${record.party.abbreviation}`,
+        title: `${record.party.name}`,
         description: '',
         backgroundColor: record.party.mainColor ? record.party.mainColor : '#333333',
         album: {connect: {year: record.rankingYear}},

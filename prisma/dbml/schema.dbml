@@ -34,8 +34,10 @@ Table Person {
   socialAxis Int
   voteState State
   deck Card [not null]
-  packs Int [not null, default: 18]
+  packs Int [not null, default: 0]
   politician Politician
+  lastFreePackAt DateTime
+  lastPackAt DateTime
 }
 
 Table Party {
@@ -195,6 +197,7 @@ Table Page {
   id Int [pk, increment]
   createdAt DateTime [default: `now()`, not null]
   updatedAt DateTime [default: `now()`, not null]
+  badge String [not null]
   title String [not null]
   description String [not null]
   backgroundColor String
@@ -238,7 +241,7 @@ Table Card {
   sticker Sticker [not null]
   stickerId Int [not null]
   isPasted Boolean [not null, default: false]
-  isNew Boolean [not null, default: false]
+  forExchange Boolean [not null, default: false]
   owner Person
   ownerId Int
 }

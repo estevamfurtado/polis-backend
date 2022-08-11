@@ -182,6 +182,27 @@ async function createManyPoliticians (people: CreateInput[]) {
     }
 }
 
+async function signUpFreePacks (id: number) {
+    await repo.update.whereId(id, {
+        packs: variables.SIGN_UP_FREE_PACKS,
+        lastPackAt: new Date(),
+        lastFreePackAt: new Date()
+    })
+}
+
+async function signInFreePacks (id: number) {
+    const person = await validateOrCrash(id);
+    const hasRight = person.lastFreePackAt && person.lastFreePackAt.getTime() + variables.SIGN_IN_FREE_CARDS_HOURS * 60 * 60 * 1000 > new Date().getTime();
+    if (hasRight) {
+        await repo.update.whereId(id, {
+            packs: person.packs + variables.SIGN_IN_FREE_PACKS,
+            lastPackAt: new Date(),
+            lastFreePackAt: new Date()
+        })
+    }
+}
+
+
 export default { 
 
     get: {
@@ -210,6 +231,8 @@ export default {
     actions: {
         referredNewUser,
         openPacks,
-        getDeck
+        getDeck,
+        signUpFreePacks,
+        signInFreePacks
     }
 };

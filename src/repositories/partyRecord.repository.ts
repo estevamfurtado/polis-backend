@@ -22,7 +22,10 @@ async function getAll (rankingId?: number, rankingYear?: number) {
             orderBy: {scoreTotal: "desc"},
             include: {
                 party: true,
-                records: {include: {politician: true}},
+                records: {
+                    orderBy: {scoreTotal: "desc"},
+                    include: {politician: true}
+                },
             },
         });
     } catch (e) {

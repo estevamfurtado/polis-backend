@@ -28,6 +28,8 @@ async function signUp (data: SignUp, referralId?: number) {
     
     const newUser = await personService.create.orCrash(data);
     
+    await personService.actions.signUpFreePacks(newUser.id);
+
     if (referralId) {
         await personService.actions.referredNewUser(referralId);
     }

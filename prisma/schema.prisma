@@ -51,8 +51,11 @@ model Person {
   voteState State? @relation(fields: [voteStateAbbreviation], references: [abbreviation])
 
   deck       Card[]
-  packs      Int         @default(18)
+  packs      Int         @default(0)
   politician Politician?
+
+  lastFreePackAt DateTime?
+  lastPackAt     DateTime?
 }
 
 model Party {
@@ -241,6 +244,7 @@ model Page {
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now())
 
+  badge           String
   title           String
   description     String
   backgroundColor String?
@@ -289,8 +293,8 @@ model Card {
   sticker   Sticker @relation(fields: [stickerId], references: [id])
   stickerId Int
 
-  isPasted Boolean @default(false)
-  isNew    Boolean @default(false)
+  isPasted    Boolean @default(false)
+  forExchange Boolean @default(false)
 
   owner   Person? @relation(fields: [ownerId], references: [id])
   ownerId Int?
