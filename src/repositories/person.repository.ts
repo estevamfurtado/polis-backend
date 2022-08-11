@@ -6,48 +6,87 @@ import loggerUtils from '../utils/logger.utils.js';
 const db = database.prisma.person;
 
 export type CreateInput = pkg.Prisma.PersonCreateInput
+export type CreateManyInput = pkg.Prisma.PersonCreateManyInput
 export type UpdateInput = pkg.Prisma.PersonUpdateInput
+
+
 
 
 async function create (person: CreateInput) {
     try {
-        loggerUtils.log('repository', 'Creating person');
         const response = await db.create({data: person});
         return response;
-    } catch (error) {
-        throw errorUtils.wrongSchema('Não foi possível criar o usuário.');
+    } catch (e) {
+        throw errorUtils.wrongSchema('Wrong person schema');
+    }
+}
+
+
+async function createMany (data: CreateManyInput[]) {
+
+    console.log('tentando criar');
+    console.log({data});
+
+    try {
+        await db.createMany({data});
+    } catch (e) {
+        console.log(e);
+        throw errorUtils.wrongSchema('Wrong person schema');
     }
 }
 
 async function get (id: number) {
-    return await db.findFirst({where: {id}});
+    try {
+        return await db.findFirst({where: {id}});
+    } catch (e) {
+        throw errorUtils.wrongSchema('Wrong id');
+    }
 }
 
 async function getByEmail (email: string) {
-    return await db.findFirst({where: {email}});
+    try {
+        return await db.findFirst({where: {email}});
+    } catch (e) {
+        throw errorUtils.wrongSchema('Wrong email');
+    }
 }
 
 async function getByCpf (cpf: string) {
-    return await db.findFirst({where: {cpf}});
+    try {
+        return await db.findFirst({where: {cpf}});
+    } catch (e) {
+        throw errorUtils.wrongSchema('Wrong cpf');
+    }
 }
 
 async function update (id: number, person: UpdateInput) {
-    return await db.update({where: {id}, data: person});
+    try {
+        return await db.update({where: {id}, data: person});
+    } catch (e) {
+        throw errorUtils.wrongSchema('Wrong schema');
+    }
 }
 
 async function getEncryptedPassword (email: string) {
-    return await db.findFirst({
-        where: {
-            email
-        },
-        select: {
-            password: true
-        }
-    });
+    try {
+        return await db.findFirst({
+            where: {
+                email
+            },
+            select: {
+                password: true
+            }
+        });
+    } catch (e) {
+        throw errorUtils.wrongSchema('Wrong schema');
+    }
 }
 
 export default {
-    create,
+    create: {
+        many: createMany,
+        one: create
+    },
     get: {
         vanilla: {
             whereId: get,

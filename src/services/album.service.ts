@@ -4,6 +4,7 @@ import Prisma, { Album } from '@prisma/client';
 import rankingService from './ranking.service.js';
 import pageService from './page.service.js';
 import loggerUtils from '../utils/logger.utils.js';
+import variables from './variables.js';
 
 type Element = Prisma.Album;
 type CreateInput = Prisma.Prisma.AlbumCreateInput;
@@ -11,7 +12,7 @@ type UpdateInput = Prisma.Prisma.AlbumUpdateInput;
 
 const repo = repos.album;
 
-const _LAST_YEAR = 2022;
+const _LAST_YEAR = variables.LAST_YEAR;
 
 async function validateOrCrash (id: number) : Promise<Element> {
     const result = await repo.get(id);
@@ -30,10 +31,9 @@ async function createOrCrash (album: CreateInput) {
 }
 
 async function createLastYear () {
-    console.log('creating album');
-    const album = await createOrCrash({year: _LAST_YEAR, title: 'Casa do Baralho', description: ''});
-    console.log('created album');
-    await pageService.createAlbumBasePages(album.id, _LAST_YEAR);
+    loggerUtils.log('service', 'Creating last year album');
+    const album = await createOrCrash({year: _LAST_YEAR, title: `Casa do Baralho`, description: ''});
+    await pageService.createAlbumPages(_LAST_YEAR);
 }
 
 
@@ -49,9 +49,15 @@ async function getLastAlbum() {
     return album;
 }
 
+async function getCompleteLastAlbum() {
+    const album = await repo.getCompleteAlbum(variables.LAST_YEAR);
+    return album;
+}
+
 export default { 
     validateOrCrash, 
     getByYear, 
     createLastYear,
-    getLastAlbum
+    getLastAlbum,
+    getCompleteLastAlbum
 };

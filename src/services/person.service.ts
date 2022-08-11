@@ -5,6 +5,7 @@ import { crypt } from '../utils/crypt/index.js';
 import cardService from './card.service.js';
 import loggerUtils from '../utils/logger.utils.js';
 import { arrayToObject } from '../utils/arrayToObject.js';
+import variables from './variables.js';
 
 
 type Element = Prisma.Person;
@@ -12,8 +13,6 @@ type CreateInput = Prisma.Prisma.PersonCreateInput;
 type UpdateInput = Prisma.Prisma.PersonUpdateInput;
 
 const repo = repos.person;
-
-const _PACK_SIZE = 5;
 
 async function get (id: number) : Promise<Element> {
     const result = await repo.get.vanilla.whereId(id);
@@ -31,7 +30,7 @@ async function validateOrCrash (id: number) : Promise<Element> {
 
 async function createOrCrash (person: CreateInput) : Promise<Element> {
     loggerUtils.log('service', 'Creating person');
-    const user = await repo.create(person);
+    const user = await repo.create.one(person);
     if (!user) {
         throw AppError.conflict('Person already exists');
     }
@@ -62,9 +61,7 @@ async function findByEmailOrCrash (email: string) : Promise<Element> {
 }
 
 async function validatePasswordOrCrash (password: string, encryptedPassword: string) : Promise<void> {
-    
     loggerUtils.log('service', 'Validating password or crash');
-    
     const isValid = crypt.bcrypt.compare(password, encryptedPassword);
     if (!isValid) {
         throw AppError.unauthorized('Invalid password');
@@ -90,7 +87,7 @@ async function openPacks (personId: number, packs?: number) {
         let amount = packs ? (person.packs > packs ? packs: person.packs) : person.packs;
         console.log(`PACKS: ${person.packs} - ${amount} = ${person.packs - amount}`);
         person.packs -= amount;
-        const cardsAmount = amount * _PACK_SIZE;
+        const cardsAmount = amount * variables.CARDS_PER_PACK;
         console.log(`CARDS: ${cardsAmount} to ${person.id} (${personId})`);
         await cardService.createRandomNewCardsToUser(personId, cardsAmount);
         const updated = await repo.update.whereId(personId, person);
@@ -112,7 +109,7 @@ async function getDeck (userId: number) {
 }
 
 type ProcessedDeck = {
-    models: {
+    stickers: {
         byId: {
             [key: number]: {
                 pasted: number[],
@@ -133,7 +130,7 @@ type ProcessedDeck = {
 
 function processCards(unprocessedCards: Prisma.Card[]) : ProcessedDeck {
     
-    const models = {
+    const stickers = {
         byId: {},
         ids: []
     }
@@ -147,18 +144,18 @@ function processCards(unprocessedCards: Prisma.Card[]) : ProcessedDeck {
     }
 
     unprocessedCards.forEach(card => {
-        if (!models.byId[card.modelId]) {
-            models.byId[card.modelId] = {
+        if (!stickers.byId[card.stickerId]) {
+            stickers.byId[card.stickerId] = {
                 pasted: [],
                 notPasted: []
             }
-            models.ids.push(card.modelId)
+            stickers.ids.push(card.stickerId)
         }
         if (card.isPasted) {
-            models.byId[card.modelId].pasted.push(card.id)
+            stickers.byId[card.stickerId].pasted.push(card.id)
             cards.arrays.pasted.push(card.id)
         } else {
-            models.byId[card.modelId].notPasted.push(card.id)
+            stickers.byId[card.stickerId].notPasted.push(card.id)
             cards.arrays.notPasted.push(card.id)
         }
         cards.byId[card.id] = card
@@ -166,13 +163,24 @@ function processCards(unprocessedCards: Prisma.Card[]) : ProcessedDeck {
     })
     
     const response = {
-        models,
+        stickers,
         cards
     }
 
     return response;
 }
 
+async function createMany (people: CreateInput[]) {
+    loggerUtils.log('service', 'Creating many people');
+    await repo.create.many(people);
+}
+
+async function createManyPoliticians (people: CreateInput[]) {
+    loggerUtils.log('service', 'Creating many politicians');
+    for (const person of people) {
+        await repo.create.one(person);
+    }
+}
 
 export default { 
 
@@ -195,7 +203,9 @@ export default {
         }
     },
     create: {
-        orCrash: createOrCrash
+        orCrash: createOrCrash,
+        many: createMany,
+        manyEach: createManyPoliticians
     },
     actions: {
         referredNewUser,

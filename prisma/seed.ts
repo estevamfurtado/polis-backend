@@ -10,45 +10,32 @@ const prisma = new Prisma.PrismaClient();
 
 async function main() {
 
-    // // console.log('>> Creating States...');
-    // await prisma.state.createMany({ data: states });
+    console.log('>> Creating States...');
+    await services.state.createMany(states);
 
-    // // console.log('>> Creating Parties...');
-    // await prisma.party.createMany({ data: parties });
+    console.log('>> Creating Parties...');
+    await services.party.createMany(parties);
 
-    // // console.log('>> Creating Politicians...');
-    // await addDeputadosToDatabase();
+    console.log('>> Creating Politicians...');
+    await services.person.create.manyEach(deputados);
 
-    // // console.log('>> Creating Rankings...');
-    // await services.ranking.createMany(rankings);
+    console.log('>> Creating Rankings...');
+    await services.ranking.createMany(rankings);
 
-    // // console.log('>> Creating Records...');
-    // await services.record.createManyEach(records);
-    // await services.partyRecord.updateAllScores();
+    console.log('>> Creating Party Records...');
+    await services.partyRecord.populate();
 
-    // // console.log('>> Creating Album...')
-    // await services.album.createLastYear();
+    console.log('>> Creating Records...');
+    await services.record.createManyEach(records);
+
+    console.log('>> Updating Scores...');
+    await services.partyRecord.updateAllScores();
+
+    console.log('>> Creating Album...')
+    await services.album.createLastYear();
 
     console.log('Seeding database... done!');
 }
-
-
-async function addDeputadosToDatabase() {
-    for (const deputado of deputados) {
-        const response = await addDeputadoToDatabase(deputado);
-    }
-}
-
-async function addDeputadoToDatabase(deputado: Prisma.Prisma.PersonCreateInput) {
-    try {
-        await prisma.person.create({ data: deputado });
-        return true;
-    } catch (error) {
-        console.log('erro salvando deputado')
-        console.log(deputado)
-    }
-}
-
 
 
 main()

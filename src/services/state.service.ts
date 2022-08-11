@@ -28,6 +28,9 @@ async function getAll () {
     return repo.getAll();
 }
 
+async function createMany(people: CreateInput[]) {
+    return repo.createMany(people);
+}
 
 export default { 
     validate: {
@@ -38,5 +41,6 @@ export default {
             orCrash: validateAbbreviationOrCrash
         }
     },
-    getAll
+    getAll,
+    createMany
 };

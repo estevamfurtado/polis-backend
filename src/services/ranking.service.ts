@@ -1,6 +1,7 @@
 import repos from '../repositories/index.js';
 import AppError from '../utils/errors/error.utils.js';
 import Prisma from '@prisma/client';
+import variables from './variables.js';
 
 type Element = Prisma.Ranking;
 type CreateInput = Prisma.Prisma.RankingCreateInput;
@@ -25,38 +26,17 @@ async function validateOrCrashByYear (year: number) : Promise<Element> {
 }
 
 async function createMany (input: CreateInput[]) {
-
     await repo.createMany(input);
-    const parties = await repos.party.getAll();
-    const rankings = await repo.getAllWithPartyRecords();
-    
-    const scoreTypes: Prisma.Prisma.PartyScoreUncheckedCreateWithoutPartyRecordInput[] = [
-        {type: 'scorePresence'},
-        {type: 'scoreSaveQuota'},
-        {type: 'scoreProcess'},
-        {type: 'scoreInternal'},
-        {type: 'scorePrivileges'},
-        {type: 'scoreWastage'},
-        {type: 'scoreTotal'}
-    ] 
-
-    for (const ranking of rankings) {
-        if (ranking.partyRecords.length === 0) {
-            for (const party of parties) {
-                await repos.partyRecord.create({
-                    party: {connect: {abbreviation: party.abbreviation}},
-                    ranking: {connect: {year: ranking.year}},
-                    scores: {create: scoreTypes}
-                });
-            }
-        }
-    }
-
 }
 
 async function getLastRanking () {
-    const result = await repo.getByYear(2022);
+    const result = await repo.getByYear(variables.LAST_YEAR);
     return result;
 }
 
-export default { validateOrCrash, validateOrCrashByYear ,createMany, getLastRanking};
+async function getLastCompleteRanking () {
+    const result = await repo.getLastCompleteRanking(variables.LAST_YEAR);
+    return result;
+}
+
+export default { validateOrCrash, validateOrCrashByYear ,createMany, getLastRanking, getLastCompleteRanking};

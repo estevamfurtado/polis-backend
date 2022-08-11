@@ -20,7 +20,12 @@ async function getAll () {
     return repo.getAll();
 }
 
+async function createMany (states: CreateInput[]) {
+    return repo.createMany(states);
+}
+
 export default { 
     validateOrCrash,
-    getAll
+    getAll,
+    createMany
 };

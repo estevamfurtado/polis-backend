@@ -1,7 +1,7 @@
 import Prisma from "@prisma/client";
 import joi from "joi";
 
-const {EconomicClass, ReactionTypes, SkinColor} = Prisma;
+const {EconomicClass, SkinColor} = Prisma;
 
 export const SignUp = joi.object().keys({
     name: joi.string().min(5).required(),
@@ -58,12 +58,6 @@ export const PutCandidate = joi.object().keys({
     partyAbbreviation: joi.string().min(2),
 } as const)
 
-export const Reaction = joi.object().keys({
-    personId: joi.number().required(),
-    candidateId: joi.number().required(),
-    type: joi.string().valid(...Object.values(ReactionTypes)),
-} as const)
-
 export const PostVideo = joi.object().keys({
     personId: joi.number().required(),
     title: joi.string().min(3).required(),
@@ -81,8 +75,4 @@ export default {
         postCandidate: PostCandidate,
         putCandidate: PutCandidate,
     },
-    tinder: {
-        react: Reaction,
-        postVideo: PostVideo,
-    }
 }

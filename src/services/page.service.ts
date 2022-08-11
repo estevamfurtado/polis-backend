@@ -1,13 +1,11 @@
 import repos from '../repositories/index.js';
 import AppError from '../utils/errors/error.utils.js';
-import Prisma from '@prisma/client';
+import Prisma, { Party, PartyRecord, Politician, Record } from '@prisma/client';
 
 
-import cardModelService from './cardModel.service.js';
-import politicalPartyService from './party.service.js';
 import stickerService from './sticker.service.js';
 import partyRecordService from './partyRecord.service.js';
-import albumRepository from '../repositories/album.repository.js';
+import loggerUtils from '../utils/logger.utils.js';
 
 type Element = Prisma.Page;
 type CreateInput = Prisma.Prisma.PageCreateInput;
@@ -15,7 +13,7 @@ type UpdateInput = Prisma.Prisma.PageUpdateInput;
 
 const repo = repos.page;
 
-async function validateOrCrash (id: number) : Promise<Element> {
+async function validateOrCrash (id: number){
     const result = await repo.get(id);
     if (!result) {
         throw AppError.notFound(`Page with id ${id} does not exist`);
@@ -24,40 +22,28 @@ async function validateOrCrash (id: number) : Promise<Element> {
 }
 
 
-async function createAlbumBasePages(albumId: number, year: number) {
-
-    console.log('creating pages');
-
-    const partyRecords = await partyRecordService.getOrderedByTotalScores(year);
-    let predecessorId = null;
-    
-    console.log(partyRecords.length);
-
-    let first = true;
+async function createAlbumPages(year: number) {
+    loggerUtils.log('service', 'Creating album pages');
+    const partyRecords = await partyRecordService.getByYearWithDetails(year);
+    let index = 0;
     for (const record of partyRecords) {
-
-        const predecessorObj = predecessorId ? {predecessor: {connect: {id: predecessorId}}} : {}
-
-        const create = {
-            title: `${record.party.name} - ${record.party.abbreviation}`,
-            description: '',
-            backgroundColor: record.party.mainColor ? record.party.mainColor : '#ffffff',
-            album: {connect: {id: albumId}},
-            ...predecessorObj
-        }
-
-        const page = await repo.create(create);
-        predecessorId = page.id;
-
-        if (first) {
-            await albumRepository.update(albumId, {entryPage: {connect: {id: page.id}}});
-            first = false;
-        }
-
-        await stickerService.createPartyPageBaseStickers(albumId, page.id, record.records, record.partyAbbreviation);
+        await createPage(record, index);
+        index++;
     }
-
 }
+
+async function createPage (record: (PartyRecord & {party: Party} & {records: (Record & {politician: Politician})[]}), orderInAlbum: number) {
+    const create = {
+        title: `${record.party.name} - ${record.party.abbreviation}`,
+        description: '',
+        backgroundColor: record.party.mainColor ? record.party.mainColor : '#333333',
+        album: {connect: {year: record.rankingYear}},
+        orderInAlbum: orderInAlbum,
+    }
+    const page = await repo.create(create);
+    await stickerService.createPartyPageBaseStickers(page, record);
+}
+
 
 async function getPagesByAlbum (albumId: number) {
     const result = await repo.getPagesWithStickersIds(albumId);
@@ -66,6 +52,6 @@ async function getPagesByAlbum (albumId: number) {
 
 export default { 
     validateOrCrash, 
-    createAlbumBasePages,
+    createAlbumPages,
     getPagesByAlbum
 };

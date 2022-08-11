@@ -276,7 +276,7 @@ model Sticker {
   partyRecord   PartyRecord? @relation(fields: [partyRecordId], references: [id])
   partyRecordId Int?         @unique
 
-  Card Card[]
+  cards Card[]
 
   @@unique([pageId, identifier])
 }

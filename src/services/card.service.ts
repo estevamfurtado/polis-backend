@@ -1,10 +1,12 @@
 import repos from '../repositories/index.js';
 import AppError from '../utils/errors/error.utils.js';
-import Prisma, { Card } from '@prisma/client';
-import cardModelService from './cardModel.service.js';
+import Prisma, { Card, StickerAvailabilityTypes } from '@prisma/client';
 import albumService from './album.service.js';
 import loggerUtils from '../utils/logger.utils.js';
 import personRepository from '../repositories/person.repository.js';
+import variables from './variables.js';
+import stickerService from './sticker.service.js';
+import { connect } from 'http2';
 
 type Element = Prisma.Card;
 type CreateInput = Prisma.Prisma.CardCreateInput;
@@ -23,36 +25,24 @@ async function validateOrCrash (id: number) : Promise<Element> {
 }
 
 async function createRandomNewCardsToUser (ownerId: number, amount: number) {
-
-    console.log(`create ${amount} to ${ownerId}`)
-
-    const getCards = await cardModelService.getByRankingWithRecords(1);
-
-    const model = getCards.sort((a, b) => b.record.scoreTotal - a.record.scoreTotal);
-
-    const length = model.length;
-
     for (let i = 0; i < amount; i++) {
-        const randomGroup = Math.random();
-        const randomElement = Math.random();
-        let modelId = null;
-        let index = 0;
-
-        if (randomGroup < 0.6) {
-            index = Math.floor((0.0 + 0.6 * randomElement) * length)
-        } else if (randomGroup < 0.8) {
-            index = Math.floor((0.5 + 0.3 * randomElement) * length)
-        } else {
-            index = Math.floor((0.8 + 0.2 * randomElement) * length)
-        }
-
-        modelId = model[index].id;
-
-        await repo.create({
-            owner: {connect: {id: ownerId}},
-            model: {connect: {id: modelId}},
-        });
+        await createNewRandomCardToUser(ownerId);
     }
+}
+
+
+async function createNewRandomCardToUser (ownerId: number) {
+    loggerUtils.log('service', 'createNewRandomCardsToUser');
+    const sortAvailability = Math.random();
+    const availability: StickerAvailabilityTypes = sortAvailability > 0.9 ? 'rare' :  sortAvailability > 0.5 ? 'medium' : 'easy';
+    const stickers = await stickerService.getAllStickersByYearAndAvailability(variables.LAST_YEAR, availability);
+    const sortSticker = Math.random();
+    const sticker = stickers[Math.floor(sortSticker * stickers.length)];
+    
+    const card = await repo.create({
+        owner: {connect: {id: ownerId}},
+        sticker: {connect: {id: sticker.id}}
+    })
 }
 
 async function pasteAll (userId: number) {
@@ -62,13 +52,13 @@ async function pasteAll (userId: number) {
     const isPastedHT = {}
     for (let i = 0; i < cards.length; i++) {
         if (cards[i].isPasted) {
-            isPastedHT[cards[i].modelId] = true
+            isPastedHT[cards[i].stickerId] = true
         }
     }
 
     for (let i = 0; i < cards.length; i++) {
         const card = cards[i];
-        const modelId = card.modelId;
+        const modelId = card.stickerId;
         const isPasted = card.isPasted;
 
         if (isPasted) {
@@ -85,14 +75,14 @@ async function pasteOrCrash (card: Card) {
     const cardId = card.id;
     const modelIsPasted = await checkIfUserHasCardPastedWithSameModel(card);
     if (modelIsPasted) {
-        throw AppError.forbidden(`There is already a card with model ${card.modelId} pasted by ${card.ownerId}`);
+        throw AppError.forbidden(`There is already a card with model ${card.stickerId} pasted by ${card.ownerId}`);
     }
     await repo.update(cardId, {isPasted: true});
 }
 
 async function checkIfUserHasCardPastedWithSameModel (card: Card) {
     const ownerId = card.ownerId;
-    const modelId = card.modelId;
+    const modelId = card.stickerId;
     const result = await repo.getPastedByOwnerIdModelId(ownerId, modelId);
     return result.length > 0;
 }

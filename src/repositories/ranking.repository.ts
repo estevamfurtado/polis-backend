@@ -1,5 +1,6 @@
 import pkg from '@prisma/client';
 import database from "../database.js";
+import errorUtils from '../utils/errors/error.utils.js';
 
 const db = database.prisma.ranking;
 
@@ -7,43 +8,93 @@ export type CreateInput = pkg.Prisma.RankingCreateInput
 export type UpdateInput = pkg.Prisma.RankingUpdateInput
 
 async function createMany (input: CreateInput[]) {
-    return await db.createMany({data: input});
+    try {
+        return await db.createMany({data: input});
+    } catch (e) {
+        throw errorUtils.wrongSchema('Wrong schema');
+    }
 }
 
 async function create (ranking: CreateInput) {
-    return await db.create({data: ranking});
+    try {
+        return await db.create({data: ranking});
+    } catch (e) {
+        throw errorUtils.wrongSchema('Wrong schema');
+    }
 }
 
 async function get (id: number) {
-    return await db.findFirst({where: {id}});
+    try {
+        return await db.findFirst({where: {id}});
+    } catch (e) {
+        throw errorUtils.wrongSchema('Wrong id');
+    }
 }
 
 async function getByYear (year: number) {
-    return await db.findFirst({
+    try {
+        return await db.findFirst({
         where: {year},
         include: {
             records: {select: {id: true}},
             partyRecords: {select: {id: true}}
         }
     });
+    } catch (e) {
+        throw errorUtils.wrongSchema('Wrong schema');
+    }
 }
 
 async function update (id: number, ranking: UpdateInput) {
-    return await db.update({where: {id}, data: ranking});
+    try {
+        return await db.update({where: {id}, data: ranking});
+    } catch (e) {
+        throw errorUtils.wrongSchema('Wrong schema');
+    }
 }
 
 async function getAll() {
-    return await db.findMany();
+    try {
+        return await db.findMany();
+    } catch (e) {
+        throw errorUtils.wrongSchema('Wrong schema');
+    }
 }
 
 async function getAllWithPartyRecords() {
-    return await db.findMany(
-        {
-            include: {
-                partyRecords: true
+    try {
+        return await db.findMany(
+            {
+                include: {
+                    partyRecords: true
+                }
             }
-        }
-    );
+        );
+    } catch (e) {
+        throw errorUtils.wrongSchema('Wrong schema');
+    }
+}
+
+async function getLastCompleteRanking (year: number) {
+    try {
+        return await db.findFirst({
+            where: {year},
+            include: {
+                partyRecords: {
+                    orderBy: {scoreTotal: 'desc'},
+                    include: {
+                        party: true,
+                        records: {
+                            orderBy: {scoreTotal: 'desc'},
+                            include: {politician: true}
+                        }
+                    }
+                }
+            }
+        });
+    } catch (e) {
+        throw errorUtils.wrongSchema('Wrong schema');
+    }
 }
 
 export default {
@@ -53,5 +104,6 @@ export default {
     update,
     createMany,
     getAll,
-    getAllWithPartyRecords
+    getAllWithPartyRecords,
+    getLastCompleteRanking
 }

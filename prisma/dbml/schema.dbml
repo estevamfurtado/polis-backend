@@ -224,7 +224,7 @@ Table Sticker {
   politicianRecordId Int [unique]
   partyRecord PartyRecord
   partyRecordId Int [unique]
-  Card Card [not null]
+  cards Card [not null]
 
   indexes {
     (pageId, identifier) [unique]

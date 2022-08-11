@@ -1,77 +1,74 @@
 import pkg from '@prisma/client';
 import database from "../database.js";
+import errorUtils from '../utils/errors/error.utils.js';
 
 const db = database.prisma.partyRecord;
 
 export type CreateInput = pkg.Prisma.PartyRecordCreateInput
 export type UpdateInput = pkg.Prisma.PartyRecordUpdateInput
 
-async function getWithRecordsAndScores (year: number, partyAbbreviation: string) {
-    return await db.findFirst({
-        where: {
-            rankingYear: year,
-            partyAbbreviation: partyAbbreviation
-        },
-        include: {
-            records: true,
-            scores: true
-        },
-    });
+async function getAll (rankingId?: number, rankingYear?: number) {
+    try {
+        const whereRankingId = rankingId ? {rankingId} : {}
+        const whereRankingYear = rankingYear ? {rankingYear} : {}
+
+        const where = {
+            ...whereRankingId,
+            ...whereRankingYear,
+        }
+
+        return await db.findMany({
+            where,
+            orderBy: {scoreTotal: "desc"},
+            include: {
+                party: true,
+                records: {include: {politician: true}},
+            },
+        });
+    } catch (e) {
+        throw errorUtils.wrongSchema('Wrong schema');
+    }
 }
 
 async function create (partyRecord: CreateInput) {
-    return await db.create({data: partyRecord});
+    try {
+        return await db.create({data: partyRecord});
+    } catch (e) {
+        throw errorUtils.wrongSchema('Wrong partyRecord schema');
+    }
 }
 
-async function get (id: number) {
-    return await db.findFirst({where: {id}});
+async function getById (id: number) {
+    try {
+        return await db.findFirst({where: {id}});
+    } catch (e) {
+        throw errorUtils.wrongSchema('Wrong id');
+    }
+}
+
+async function getByYearAndParty (year: number, partyAbbreviation: string) {
+    return await db.findFirst({where: {
+        rankingYear: year,
+        partyAbbreviation,
+    }});
 }
 
 async function update (id: number, partyRecord: UpdateInput) {
-    return await db.update({where: {id}, data: partyRecord});
-}
-
-async function updateScores(id: number, newScores: pkg.Prisma.PartyScoreUpdateWithWhereUniqueWithoutPartyRecordInput[]) {
-    return await db.update({
-        where: {id},
-        data: {scores: {
-            update: newScores
-        }}
-    });
-}
-
-async function getAllWithRecordsAndScores (year?: number) {
-    const where = year ? {where: {rankingYear: year}} : null;
-    return await db.findMany({
-        ...where,
-        include: {
-            records: {
-                include: {
-                    politician: true,
-                }
-            },
-            scores: true,
-            party: true
-        }
-    });
-}
-
-async function getByRanking (rankingId: number) {
-    return await db.findMany({
-        where: { ranking: { id: rankingId } },
-        include: {
-            records: { select: {id: true} },
-            scores: true,
-        }
-    });
+    try {
+        return await db.update({where: {id}, data: partyRecord});
+    } catch (e) {
+        console.log(partyRecord);
+        console.log(e);
+        throw errorUtils.wrongSchema('Wrong schema');
+    }
 }
 
 export default {
     create,
-    get,
     update,
-    getWithRecordsAndScores,
-    updateScores,
-    getAllWithRecordsAndScores,
-    getByRanking
+    get: {
+        all: getAll,
+        byId: getById,
+        byYearAndParty: getByYearAndParty,
+    }
 }
