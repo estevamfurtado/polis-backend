@@ -84,11 +84,14 @@ async function getLastCompleteRanking (year: number) {
                     orderBy: {scoreTotal: 'desc'},
                     include: {
                         party: true,
-                        records: {
-                            orderBy: {scoreTotal: 'desc'},
-                            include: {politician: true}
-                        }
                     }
+                },
+                records: {
+                    orderBy: {scoreTotal: 'desc'},
+                    include: {
+                        politician: true,
+                        party: true,
+                    },
                 }
             }
         });
