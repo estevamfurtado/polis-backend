@@ -40,6 +40,7 @@ async function signIn (dados: {email: string, password: string}) {
     const user = await personService.get.byEmail.orCrash(dados.email);
     const encryptedPassword = await repos.person.get.encryptedPasword.whereEmail(dados.email);
     await personService.validate.password.orCrash(dados.password, encryptedPassword.password ?? '');
+    await personService.actions.signInFreePacks(user.id);
     const token = crypt.jwt.create(user);
     return token;
 }
