@@ -68,8 +68,8 @@
       "cnpj": "01248360000000",
       "name": "PODEMOS",
       "abbreviation": "PODE",
-      "logoUrl": "#5a88c6",
-      "mainColor": "https://www.podemos.org.br/wp-content/uploads/2022/02/@Marca-Podemos-19.png"
+      "logoUrl": "https://www.podemos.org.br/wp-content/uploads/2022/02/@Marca-Podemos-19.png",
+      "mainColor": "#5a88c6"
     },
     {
       "cnpj": "01450860000000",
