@@ -82,7 +82,27 @@ async function getEncryptedPassword (email: string) {
     }
 }
 
+async function searchByEmail (incompleteEmail: string) {
+    const max=5;
+    const email = incompleteEmail.toLowerCase();
+    const response = await db.findMany({
+        where: {
+            email: {contains: email},
+            isActive: true
+        },
+        select: {
+            email: true,
+            name: true,
+            id: true
+        },
+        orderBy: {name: 'asc'},
+        take: max
+    });
+    return response;
+}
+
 export default {
+    searchByEmail,
     create: {
         many: createMany,
         one: create

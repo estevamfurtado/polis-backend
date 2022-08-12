@@ -38,6 +38,22 @@ Table Person {
   politician Politician
   lastFreePackAt DateTime
   lastPackAt DateTime
+  exchangesProposed ExchangeRequest [not null]
+  exchangesRequested ExchangeRequest [not null]
+  isActive Boolean [not null, default: false]
+  myFriends Friendship [not null]
+  friendshipRequested Friendship [not null]
+}
+
+Table Friendship {
+  id Int [pk, increment]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [default: `now()`, not null]
+  user Person [not null]
+  userId Int [not null]
+  friend Person [not null]
+  friendId Int [not null]
+  status FriendshipStatus [not null]
 }
 
 Table Party {
@@ -241,9 +257,34 @@ Table Card {
   sticker Sticker [not null]
   stickerId Int [not null]
   isPasted Boolean [not null, default: false]
-  forExchange Boolean [not null, default: false]
+  forExchange Boolean [not null, default: true]
   owner Person
   ownerId Int
+  offeredAt ExchangeRequest [not null]
+  requestedAt ExchangeRequest [not null]
+}
+
+Table ExchangeRequest {
+  id Int [pk, increment]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [default: `now()`, not null]
+  status ExchangeStatus [not null, default: 'pending']
+  cardsOffered Card [not null]
+  cardsRequested Card [not null]
+  proposerId Int [not null]
+  proposer Person [not null]
+  requestedId Int [not null]
+  requested Person [not null]
+}
+
+Table CardExchangeOfferedCard {
+  offeredatId Int [ref: > ExchangeRequest.id]
+  cardsofferedId Int [ref: > Card.id]
+}
+
+Table CardExchangeRequestedCard {
+  requestedatId Int [ref: > ExchangeRequest.id]
+  cardsrequestedId Int [ref: > Card.id]
 }
 
 Enum EconomicClass {
@@ -294,7 +335,25 @@ Enum PartyScoreTypes {
   scoreTotal
 }
 
+Enum ExchangeStatus {
+  pending
+  accepted
+  rejected
+  canceled
+}
+
+Enum FriendshipStatus {
+  pending
+  accepted
+  rejected
+  canceled
+}
+
 Ref: Person.voteStateAbbreviation > State.abbreviation
+
+Ref: Friendship.userId > Person.id
+
+Ref: Friendship.friendId > Person.id
 
 Ref: Politician.personId - Person.id
 
@@ -327,3 +386,7 @@ Ref: Sticker.partyRecordId - PartyRecord.id
 Ref: Card.stickerId > Sticker.id
 
 Ref: Card.ownerId > Person.id
+
+Ref: ExchangeRequest.proposerId > Person.id
+
+Ref: ExchangeRequest.requestedId > Person.id

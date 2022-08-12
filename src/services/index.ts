@@ -10,6 +10,7 @@ import record from './record.service.js';
 import sticker from './sticker.service.js';
 import state from './state.service.js';
 import person from './person.service.js';
+import exchangeRequest from './exchangeRequest.service.js';
 
 export default {
     auth,
@@ -23,5 +24,6 @@ export default {
     sticker,
     state,
     person,
-    partyRecord
+    partyRecord,
+    exchangeRequest
 }

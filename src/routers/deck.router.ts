@@ -33,7 +33,7 @@ router.post("/paste-all",
     ct.deck.pasteAllCards
 );
 
-// post deck/paste/:cardId
+// post deck/paste/:cardId ok
 router.post("/paste/:cardId",
     mw.help.logRoute("Paste card"),
     mw.auth.validateToken,
@@ -41,5 +41,49 @@ router.post("/paste/:cardId",
     ct.deck.pasteCard
 );
 
+// toggle mark card ok
+router.put("/toggle-mark/:cardId",
+    mw.help.logRoute("Toggle mark card"),
+    mw.auth.validateToken,
+    mw.set.localsFromRequestData,
+    ct.deck.toggleMarkCard
+);
+
+// postExchangeRequest
+router.post("/exchange/request",
+    mw.help.logRoute("Post exchange request"),
+    mw.auth.validateToken,
+    mw.set.localsFromRequestData,
+    ct.exchangeRequest.postExchangeRequest
+);
+
+// answerExchangeRequest
+router.put("/exchange/:exchangeId/accept",
+    mw.help.logRoute("Answer exchange request"),
+    mw.auth.validateToken,
+    mw.set.localsFromRequestData,
+    ct.exchangeRequest.acceptRequest
+);
+
+router.put("/exchange/:exchangeId/reject",
+    mw.help.logRoute("Answer exchange request"),
+    mw.auth.validateToken,
+    mw.set.localsFromRequestData,
+    ct.exchangeRequest.rejectRequest
+);
+
+router.put("/exchange/:exchangeId/cancel",
+    mw.help.logRoute("Answer exchange request"),
+    mw.auth.validateToken,
+    mw.set.localsFromRequestData,
+    ct.exchangeRequest.cancelRequest
+);
+
+// getExchangeRequests
+router.get("/exchange/requests",
+    mw.help.logRoute("Get exchange requests"),
+    mw.auth.validateToken,
+    ct.exchangeRequest.getExchangeRequests
+);
 
 export default router;

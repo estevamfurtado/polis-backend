@@ -56,6 +56,27 @@ model Person {
 
   lastFreePackAt DateTime?
   lastPackAt     DateTime?
+
+  exchangesProposed  ExchangeRequest[] @relation(name: "CardExchangeProposer")
+  exchangesRequested ExchangeRequest[] @relation(name: "CardExchangeRequested")
+
+  isActive Boolean @default(false)
+
+  myFriends           Friendship[] @relation(name: "FriendshipProposer")
+  friendshipRequested Friendship[] @relation(name: "FriendshipRequested")
+}
+
+model Friendship {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+
+  user     Person @relation(name: "FriendshipProposer", fields: [userId], references: [id])
+  userId   Int
+  friend   Person @relation(name: "FriendshipRequested", fields: [friendId], references: [id])
+  friendId Int
+
+  status FriendshipStatus
 }
 
 model Party {
@@ -294,10 +315,29 @@ model Card {
   stickerId Int
 
   isPasted    Boolean @default(false)
-  forExchange Boolean @default(false)
+  forExchange Boolean @default(true)
 
   owner   Person? @relation(fields: [ownerId], references: [id])
   ownerId Int?
+
+  offeredAt   ExchangeRequest[] @relation(name: "CardExchangeOfferedCard")
+  requestedAt ExchangeRequest[] @relation(name: "CardExchangeRequestedCard")
+}
+
+model ExchangeRequest {
+  id        Int            @id @default(autoincrement())
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @default(now())
+  status    ExchangeStatus @default(pending)
+
+  cardsOffered   Card[] @relation("CardExchangeOfferedCard")
+  cardsRequested Card[] @relation("CardExchangeRequestedCard")
+
+  proposerId Int
+  proposer   Person @relation(name: "CardExchangeProposer", fields: [proposerId], references: [id])
+
+  requestedId Int
+  requested   Person @relation(name: "CardExchangeRequested", fields: [requestedId], references: [id])
 }
 
 // ENUMS -----------------------------------------------------------------
@@ -348,4 +388,18 @@ enum PartyScoreTypes {
   scorePrivileges
   scoreWastage
   scoreTotal
+}
+
+enum ExchangeStatus {
+  pending
+  accepted
+  rejected
+  canceled
+}
+
+enum FriendshipStatus {
+  pending
+  accepted
+  rejected
+  canceled
 }

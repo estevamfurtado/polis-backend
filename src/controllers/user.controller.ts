@@ -11,6 +11,13 @@ async function getUser (req: Request, res: Response) {
     res.send(user);
 }
 
+async function getUsersByEmail (req: Request, res: Response) {
+
+    const {email} = res.locals;
+    const users = await services.person.search.byEmail(email);
+    res.send(users);
+}
+
 async function putCandidateProfile (req: Request, res: Response) {
 }
 
@@ -26,5 +33,6 @@ export default {
     getUser,
     putCandidateProfile,
     postCandidateProfile,
-    getUserInvite
+    getUserInvite,
+    getUsersByEmail,
 }

@@ -107,6 +107,28 @@ async function validateOwnership(cardId: number, ownerId: number) {
     return card;
 }
 
+async function toggleMark (cardId: number, ownerId: number) {
+    loggerUtils.log('service', 'toggleMark');
+    const card = await validateOwnership(cardId, ownerId);
+    const isMarked = card.forExchange;
+    await repo.update(cardId, {forExchange: !isMarked});
+}
+
+async function changeOwner (cardId: number, previousOwnerId: number, newOwnerId: number) {
+    const card = await repo.get(cardId);
+    if (card.ownerId === previousOwnerId) {
+        await repo.update(cardId, {owner: {connect: {id: newOwnerId}}});
+    }
+}
+
+async function validateOwner (cardId: number, ownerId: number) {
+    const card = await validateOrCrash(cardId);
+    if (card.ownerId !== ownerId) {
+        throw AppError.forbidden(`Card with id ${cardId} is not owned by ${ownerId}`);
+    }
+    return card;
+}
+
 export default { 
     validateOrCrash, 
     createRandomNewCardsToUser, 
@@ -114,5 +136,7 @@ export default {
     pasteOrCrash, 
     getAllCardsFromUser, 
     validateOwnership,
-    getAllByOwner
+    getAllByOwner,
+    toggleMark,
+    changeOwner
 };

@@ -12,7 +12,12 @@ async function getDeck (req: Request, res: Response) {
     res.send(deck);
 }
 
-async function getDeckPacks (req: Request, res: Response) {
+async function getOtherUserDeck (req: Request, res: Response) {
+    loggerUtils.log('controller', 'Getting other user deck');
+    const userId = Number(res.locals.personId);
+    console.log(res.locals.id + ' > ' + userId);
+    const deck = await services.person.actions.getDeck(userId);
+    res.send(deck);
 }
 
 async function openAllDeckPacks (req: Request, res: Response) {
@@ -44,11 +49,22 @@ async function pasteCard (req: Request, res: Response) {
     res.sendStatus(200);
 }
 
+async function toggleMarkCard (req: Request, res: Response) {
+    loggerUtils.log('controller', 'Toggling mark card');
+    const cardId = Number(res.locals.cardId);
+    const ownerId = res.locals.user.id;
+
+    await services.card.toggleMark(cardId, ownerId);
+    res.sendStatus(200);
+}
+
+
 export default {
     getDeck,
-    getDeckPacks,
+    getOtherUserDeck,
     openAllDeckPacks,
     openOneDeckPack,
     pasteAllCards,
-    pasteCard
+    pasteCard,
+    toggleMarkCard
 }

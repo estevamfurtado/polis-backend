@@ -9,6 +9,7 @@ import record from './record.repository.js';
 import sticker from './sticker.repository.js';
 import state from './state.repository.js';
 import person from './person.repository.js';
+import exchangeRequest from './exchangeRequest.repository.js';
 
 export default {
     album,
@@ -21,5 +22,6 @@ export default {
     sticker,
     state,
     person,
-    partyRecord
+    partyRecord,
+    exchangeRequest
 }

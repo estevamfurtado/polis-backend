@@ -42,4 +42,18 @@ router.get("/invite",
     ct.user.getUserInvite
 );
 
+router.get('/search/email/:email',
+    mw.help.logRoute("Get users by email"),
+    mw.auth.validateToken,
+    mw.set.localsFromRequestData,
+    ct.user.getUsersByEmail,
+);
+
+router.get('/deck/:personId',
+    mw.help.logRoute("Get deck"),
+    mw.auth.validateToken,
+    mw.set.localsFromRequestData,
+    ct.deck.getOtherUserDeck
+);
+
 export default router;

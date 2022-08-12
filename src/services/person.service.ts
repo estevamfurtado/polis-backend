@@ -202,9 +202,15 @@ async function signInFreePacks (id: number) {
     }
 }
 
+async function searchByEmail (email: string) {
+    loggerUtils.log('service', 'Searching by email');
+    const result = await repo.searchByEmail(email);
+    return result;
+}
+
 
 export default { 
-
+    search: { byEmail: searchByEmail},
     get: {
         byId: {
             only: get,

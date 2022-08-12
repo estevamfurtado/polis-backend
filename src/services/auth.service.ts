@@ -26,6 +26,8 @@ async function signUp (data: SignUp, referralId?: number) {
 
     await personService.get.byCpf.andCrash(data.cpf);
     
+    data.isActive = true;
+
     const newUser = await personService.create.orCrash(data);
     
     await personService.actions.signUpFreePacks(newUser.id);
