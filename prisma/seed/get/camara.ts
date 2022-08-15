@@ -77,6 +77,38 @@ async function saveDeputadosAsPeople() {
 
 function fabricatePoliticalPerson(deputado: RawDeputado, index: number) : Prisma.PersonCreateInput {
     console.log(index);
+
+    const contact ={
+        create: {
+            phone: deputado.ultimoStatus?.gabinete?.telefone ? deputado.ultimoStatus.gabinete.telefone : null,
+            email: deputado.email ? deputado.email : null,
+            twitter: deputado.redeSocial?.find(url => {
+                return url.includes('twitter');
+            }) || null,
+            facebook: deputado.redeSocial?.find(url => {
+                return url.includes('facebook');
+            }) || null,
+            instagram: deputado.redeSocial?.find(url => {
+                return url.includes('instagram');
+            }) || null,
+            youtube: deputado.redeSocial?.find(url => {
+                return url.includes('youtube');
+            }) || null,
+            website: deputado.urlWebsite ? deputado.urlWebsite : null,
+        }
+    }
+
+    const politicianProfile = {
+        create: {
+            name: deputado.ultimoStatus?.nomeEleitoral || deputado.nome,
+            description: '',
+            partyAbbreviation: deputado.ultimoStatus?.siglaPartido || deputado.siglaPartido,
+            stateAbbreviation: deputado.ultimoStatus?.siglaUf || deputado.siglaUf,
+            officialId: String(deputado.id),
+            imageUrl: deputado.urlFoto,
+        }
+    }
+
     return {
         name: deputado.nome,
         cpf: deputado.cpf,
@@ -87,35 +119,7 @@ function fabricatePoliticalPerson(deputado: RawDeputado, index: number) : Prisma
         voteState: {connect: {
             abbreviation: deputado.ufNascimento ? deputado.ufNascimento : deputado.siglaUf
         }},
-        contact: {
-            create: {
-                phone: deputado.ultimoStatus?.gabinete?.telefone ? deputado.ultimoStatus.gabinete.telefone : null,
-                email: deputado.email ? deputado.email : null,
-                twitter: deputado.redeSocial?.find(url => {
-                    return url.includes('twitter');
-                }) || null,
-                facebook: deputado.redeSocial?.find(url => {
-                    return url.includes('facebook');
-                }) || null,
-                instagram: deputado.redeSocial?.find(url => {
-                    return url.includes('instagram');
-                }) || null,
-                youtube: deputado.redeSocial?.find(url => {
-                    return url.includes('youtube');
-                }) || null,
-                website: deputado.urlWebsite ? deputado.urlWebsite : null,
-            }
-        },
-        politicianProfile: {
-            create: {
-                name: deputado.ultimoStatus?.nomeEleitoral || deputado.nome,
-                description: '',
-                partyAbbreviation: deputado.ultimoStatus?.siglaPartido || deputado.siglaPartido,
-                stateAbbreviation: deputado.ultimoStatus?.siglaUf || deputado.siglaUf,
-                officialId: String(deputado.id),
-                imageUrl: deputado.urlFoto,
-            }
-        }
+        politician: politicianProfile
     };
 }
 
