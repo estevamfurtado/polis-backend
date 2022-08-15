@@ -15,7 +15,7 @@ async function signIn (req: Request, res: Response) {
 async function signUp (req: Request, res: Response) {
 
     loggerUtils.log('controller', 'Signing Up');
-    const referralId = req.headers.referralId ? Number(req.headers.referralId) : undefined;
+    const referralId = Number(res.locals.referralId) ?? undefined;
     await services.auth.signUp(req.body, referralId);
     loggerUtils.log('return', 'Signed up');
     res.sendStatus(201);
