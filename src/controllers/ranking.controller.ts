@@ -48,22 +48,12 @@ async function getRanking (req: Request, res: Response) {
             ]
         };
 
-        for (const record of rankingData.records) {
-            if (!politicians[record.politicianId]) {politicians[record.politicianId] = record.politician;}
-            if (!states[record.stateAbbreviation]) {states[record.stateAbbreviation] = record.state;}
-            if (!parties[record.partyAbbreviation]) {parties[record.partyAbbreviation] = record.party;}
-            if (!politicianRecords[record.politicianId]) {politicianRecords[record.politicianId] = record;}
-            
-            let index = 4;
-            if (record.scoreRanking <= 10) {index = 0}
-            else if (record.scoreRanking <= 50) {index = 1}
-            else if (record.scoreRanking <= 100) {index = 2}
-            else if (record.scoreRanking <= 250) {index = 3}
-            rankings.ranking[index].records.push(record.id);
-        }
+
         for (const partyRecord of rankingData.partyRecords) {
             if (!partyRecords[partyRecord.id]) {partyRecords[partyRecord.id] = partyRecord;}
             if (!parties[partyRecord.partyAbbreviation]) {parties[partyRecord.partyAbbreviation] = partyRecord.party;}
+            
+            // Ranking by party
             const group = {
                 title: partyRecord.partyAbbreviation,
                 color: partyRecord.party.mainColor,
@@ -71,6 +61,23 @@ async function getRanking (req: Request, res: Response) {
             }
             rankings.parties.push(group)
         }
+
+        for (const record of rankingData.records) {
+            if (!politicians[record.politicianId]) {politicians[record.politicianId] = record.politician;}
+            if (!states[record.stateAbbreviation]) {states[record.stateAbbreviation] = record.state;}
+            if (!parties[record.partyAbbreviation]) {parties[record.partyAbbreviation] = record.party;}
+            if (!politicianRecords[record.id]) {politicianRecords[record.id] = record;}
+            
+            // Ranking by Ranking
+            let index = 4;
+            if (record.scoreRanking <= 10) {index = 0}
+            else if (record.scoreRanking <= 50) {index = 1}
+            else if (record.scoreRanking <= 100) {index = 2}
+            else if (record.scoreRanking <= 250) {index = 3}
+            rankings.ranking[index].records.push(record.id);
+
+        }
+
 
         return {
             rankings,
