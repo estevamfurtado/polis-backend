@@ -8,7 +8,7 @@ import { arrayToObject } from "../utils/arrayToObject.js";
 type RankingGroup = {
     title: string;
     color: string;
-    politicians: number[];
+    records: number[];
 }
 
 type RankingResponse = {
@@ -37,14 +37,14 @@ async function getRanking (req: Request, res: Response) {
         const states = {}; // ok
         const parties = {}; // ok
         
-        const rankings = {
+        const rankings : {parties: RankingGroup[], ranking: RankingGroup[]} = {
             parties: [],
             ranking: [
-                {title: 'Top 10', color: 'green.400', politicians: []},
-                {title: 'Top 50', color: 'blue.400', politicians: []},
-                {title: 'Top 100', color: 'orange.400', politicians: []},
-                {title: 'Top 250', color: 'purple.400', politicians: []},
-                {title: 'Outros', color: 'red.400', politicians: []},
+                {title: 'Top 10', color: 'green.400', records: []},
+                {title: 'Top 50', color: 'blue.400', records: []},
+                {title: 'Top 100', color: 'orange.400', records: []},
+                {title: 'Top 250', color: 'purple.400', records: []},
+                {title: 'Outros', color: 'red.400', records: []},
             ]
         };
 
@@ -59,7 +59,7 @@ async function getRanking (req: Request, res: Response) {
             else if (record.scoreRanking <= 50) {index = 1}
             else if (record.scoreRanking <= 100) {index = 2}
             else if (record.scoreRanking <= 250) {index = 3}
-            rankings.ranking[index].politicians.push(record.politicianId);
+            rankings.ranking[index].records.push(record.id);
         }
         for (const partyRecord of rankingData.partyRecords) {
             if (!partyRecords[partyRecord.id]) {partyRecords[partyRecord.id] = partyRecord;}
@@ -67,7 +67,7 @@ async function getRanking (req: Request, res: Response) {
             const group = {
                 title: partyRecord.partyAbbreviation,
                 color: partyRecord.party.mainColor,
-                politicians: partyRecord.records.map(r => r.politicianId)
+                records: partyRecord.records.map(r => r.id)
             }
             rankings.parties.push(group)
         }

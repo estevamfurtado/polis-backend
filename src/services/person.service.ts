@@ -84,14 +84,14 @@ async function openPacks (personId: number, packs?: number) {
     loggerUtils.log('service', 'Opening packs');
 
     const person = await validateOrCrash(personId);
-    console.log(person.id)
+    // console.log(person.id)
 
     if (person.packs > 0) {
         let amount = packs ? (person.packs > packs ? packs: person.packs) : person.packs;
-        console.log(`PACKS: ${person.packs} - ${amount} = ${person.packs - amount}`);
+        // console.log(`PACKS: ${person.packs} - ${amount} = ${person.packs - amount}`);
         person.packs -= amount;
         const cardsAmount = amount * variables.CARDS_PER_PACK;
-        console.log(`CARDS: ${cardsAmount} to ${person.id} (${personId})`);
+        // console.log(`CARDS: ${cardsAmount} to ${person.id} (${personId})`);
         await cardService.createRandomNewCardsToUser(personId, cardsAmount);
         const updated = await repo.update.whereId(personId, person);
     } else {
