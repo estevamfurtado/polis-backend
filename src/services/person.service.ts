@@ -278,7 +278,7 @@ async function signUpFreePacks (id: number) {
 
 async function signInFreePacks (id: number) {
     const person = await validateOrCrash(id);
-    const hasRight = person.lastFreePackAt && person.lastFreePackAt.getTime() + variables.SIGN_IN_FREE_CARDS_HOURS * 60 * 60 * 1000 > new Date().getTime();
+    const hasRight = person.lastFreePackAt && person.lastFreePackAt.getTime() + variables.SIGN_IN_FREE_CARDS_HOURS * 60 * 60 * 1000 < new Date().getTime();
     if (hasRight) {
         await repo.update.whereId(id, {
             packs: person.packs + variables.SIGN_IN_FREE_PACKS,
