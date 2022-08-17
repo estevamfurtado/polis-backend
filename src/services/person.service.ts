@@ -171,7 +171,7 @@ async function getDeck (userId: number) {
             const sticker = processedStickers[card.stickerId] ?? null;
 
             const isPasted = card.isPasted;
-            const isRecent = card.createdAt.getDate() > (new Date().getTime() - 1000*60*60);
+            const isRecent = card.createdAt.getTime() > (new Date().getTime() - 1000*60*60);
             const isFavorite = !card.forExchange;
 
             processedCards.deck.all.push(card.id);
