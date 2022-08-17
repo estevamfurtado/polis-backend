@@ -8,7 +8,6 @@ import { arrayToObject } from "../utils/arrayToObject.js";
 async function getDeck (req: Request, res: Response) {
     loggerUtils.log('controller', 'Getting deck');
     const deck = await services.person.actions.getDeck(res.locals.user.id);
-    console.log(deck);
     res.send(deck);
 }
 

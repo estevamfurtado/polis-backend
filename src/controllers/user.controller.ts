@@ -13,8 +13,14 @@ async function getUser (req: Request, res: Response) {
 
 async function getUsersByEmail (req: Request, res: Response) {
 
-    const {email} = res.locals;
-    const users = await services.person.search.byEmail(email);
+    const {email} = req.query;
+
+    if (!email) {
+        res.sendStatus(400);
+        return;
+    }
+
+    const users = await services.person.search.byEmail(email as string);
     res.send(users);
 }
 

@@ -69,10 +69,10 @@ async function getCompleteAlbum (year: number) {
                     include: {
                         stickers: {
                             orderBy: {orderInPage: 'asc'},
-                            include: {
-                                partyRecord: true,
-                                politicianRecord: true,
-                            }
+                            // include: {
+                            //     partyRecord: true,
+                            //     politicianRecord: true,
+                            // }
                         }
                     }
                 }

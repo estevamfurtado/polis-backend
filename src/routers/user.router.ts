@@ -42,7 +42,7 @@ router.get("/invite",
     ct.user.getUserInvite
 );
 
-router.get('/search/email/:email',
+router.get('/search/email',
     mw.help.logRoute("Get users by email"),
     mw.auth.validateToken,
     mw.set.localsFromRequestData,

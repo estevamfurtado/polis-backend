@@ -49,10 +49,49 @@ async function getLastAlbum() {
     return album;
 }
 
-async function getCompleteLastAlbum() {
-    const album = await repo.getCompleteAlbum(variables.LAST_YEAR);
-    return album;
+async function getCompleteLastAlbum() : Promise<AlbumResponse> {
+    const completeAlbum = await repo.getCompleteAlbum(variables.LAST_YEAR);
+
+    const album = {
+        ...completeAlbum,
+        pages: []
+    };
+    const pages = {}
+    const stickers = {}
+
+    for (const page of completeAlbum.pages) {
+
+        album.pages.push(page.id);
+        pages[page.id] = {
+            ...page,
+            stickers: []
+        }
+
+        for (const sticker of page.stickers) {
+            pages[page.id].stickers.push(sticker.id);
+            stickers[sticker.id] = {
+                ...sticker,
+            }
+        }
+    }
+
+    return {album, pages, stickers};
 }
+
+type AlbumResponse = {
+    album: Prisma.Album & {
+        pages: number[];
+    },
+    pages: {
+        [key: number]: (Prisma.Page & {
+            stickers: number[];
+        });
+    },
+    stickers: {
+        [key: number]: Prisma.Sticker;
+    }
+}
+
 
 export default { 
     validateOrCrash, 
