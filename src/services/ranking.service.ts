@@ -39,4 +39,6 @@ async function getLastCompleteRanking () {
     return result;
 }
 
+
+
 export default { validateOrCrash, validateOrCrashByYear ,createMany, getLastRanking, getLastCompleteRanking};
