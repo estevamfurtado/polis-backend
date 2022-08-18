@@ -102,7 +102,7 @@ async function openPacks (personId: number, packs?: number) {
 
 async function getDeck (userId: number) {
 
-    const {album, pages, stickers} = await albumService.getCompleteLastAlbum();
+    const {album, pages, stickers, stickersLine} = await albumService.getCompleteLastAlbum();
     
     const person = await validateOrCrash(userId);
     const packs = {
@@ -143,9 +143,7 @@ async function getDeck (userId: number) {
 
     function process() {
     
-        const lineStickers = Object.keys(stickers);
-
-        lineStickers.forEach(s => {
+        stickersLine.forEach(s => {
             const sticker = stickers[s];
             if (sticker) {
                 processedStickers[s] = {

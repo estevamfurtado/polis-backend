@@ -52,6 +52,8 @@ async function getLastAlbum() {
 async function getCompleteLastAlbum() : Promise<AlbumResponse> {
     const completeAlbum = await repo.getCompleteAlbum(variables.LAST_YEAR);
 
+    const stickersLine : number[] = [];
+
     const album = {
         ...completeAlbum,
         pages: []
@@ -68,6 +70,9 @@ async function getCompleteLastAlbum() : Promise<AlbumResponse> {
         }
 
         for (const sticker of page.stickers) {
+
+            stickersLine.push(sticker.id);
+
             pages[page.id].stickers.push(sticker.id);
             stickers[sticker.id] = {
                 ...sticker,
@@ -75,7 +80,7 @@ async function getCompleteLastAlbum() : Promise<AlbumResponse> {
         }
     }
 
-    return {album, pages, stickers};
+    return {album, pages, stickers, stickersLine};
 }
 
 type AlbumResponse = {
@@ -89,7 +94,8 @@ type AlbumResponse = {
     },
     stickers: {
         [key: number]: Prisma.Sticker;
-    }
+    },
+    stickersLine: number[],
 }
 
 

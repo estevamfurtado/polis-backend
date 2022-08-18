@@ -64,7 +64,14 @@ async function getPastedByOwnerIdModelId (ownerId: number, stickerId: number) {
 
 async function getAllByOwner (ownerId: number) {
     try {
-        return await db.findMany({where: {ownerId}});
+        return await db.findMany({
+            where: {ownerId},
+            orderBy: {
+                sticker: {
+                    id: 'asc'
+                }
+            }
+        });
     } catch (e) {
         throw errorUtils.wrongSchema('Wrong id');
     }
