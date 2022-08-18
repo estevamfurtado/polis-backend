@@ -84,7 +84,9 @@ async function getLastCompleteRanking (year: number) {
                     orderBy: {scoreTotal: 'desc'},
                     include: {
                         party: true,
-                        records: true
+                        records: {
+                            orderBy: {scoreTotal: 'desc'},
+                        }
                     }
                 },
                 records: {
