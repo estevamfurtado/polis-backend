@@ -25,25 +25,38 @@ async function validateOrCrash (id: number) : Promise<Element> {
 }
 
 async function createRandomNewCardsToUser (ownerId: number, amount: number) {
-    for (let i = 0; i < amount; i++) {
-        await createNewRandomCardToUser(ownerId);
-    }
-}
-
-
-async function createNewRandomCardToUser (ownerId: number) {
     loggerUtils.log('service', 'createNewRandomCardsToUser');
-    const sortAvailability = Math.random();
-    const availability: StickerAvailabilityTypes = sortAvailability > 0.9 ? 'rare' :  sortAvailability > 0.5 ? 'medium' : 'easy';
-    const stickers = await stickerService.getAllStickersByYearAndAvailability(variables.LAST_YEAR, availability);
-    const sortSticker = Math.random();
-    const sticker = stickers[Math.floor(sortSticker * stickers.length)];
     
-    const card = await repo.create({
-        owner: {connect: {id: ownerId}},
-        sticker: {connect: {id: sticker.id}}
-    })
+    const rare = await stickerService.getAllStickersByYearAndAvailability(variables.LAST_YEAR, 'rare');
+    const medium = await stickerService.getAllStickersByYearAndAvailability(variables.LAST_YEAR, 'medium');
+    const easy = await stickerService.getAllStickersByYearAndAvailability(variables.LAST_YEAR, 'easy');
+
+    const stickers = {easy, medium, rare};
+
+    for (let i=0; i < amount; i++) {
+        const sortAvailability = Math.random();
+        const availability: StickerAvailabilityTypes = 
+            sortAvailability > 0.88 // 12%
+                ? 'rare' 
+                : sortAvailability > 0.75
+                    ? 'medium' // 13%
+                    : 'easy'; // 75%
+
+        const array = stickers[availability];
+
+        const sortSticker = Math.random();
+        const index = Math.floor(sortSticker * array.length)
+        const sticker = array[index];
+        
+        const card = await repo.create({
+            owner: {connect: {id: ownerId}},
+            sticker: {connect: {id: sticker.id}}
+        })
+    }
+
 }
+
+
 
 async function pasteAll (userId: number) {
     loggerUtils.log('service', 'Paste All');
