@@ -42,11 +42,7 @@ async function validateRequestProposerId (id: number, proposerId: number) {
 
 async function validateRequestRequestedId (id: number, requestedId: number) {
     loggerUtils.log('service', `Validating requested id ${id}`);
-
     const request = await repositories.exchangeRequest.getById(id)
-
-    loggerUtils.log('service', `... confronting ${requestedId} with ${request.requestedId}`);
-
     if (request.requestedId !== requestedId) {
         throw AppError.forbidden('You are not the requested of this request')
     }
@@ -67,7 +63,7 @@ async function acceptRequest (id: number, requestedId: number) {
     })
 
     cardsRequested.forEach(async (card) => {
-        await cardService.changeOwner(card.id, proposerId, requestedId);
+        await cardService.changeOwner(card.id, requestedId, proposerId);
     })
 }
 
