@@ -108,7 +108,7 @@ async function getCompleteLastAlbum() : Promise<AlbumResponse> {
                 console.log(pagesByStatesObj[stateAbb]);
                 
                 
-                if (pagesByStatesObj[stateAbb] && pagesByStatesObj[stateAbb] > -1) {
+                if (pagesByStatesObj[stateAbb] && pagesByStatesObj[stateAbb]+1 > 0) {
                     pagesByStates[pagesByStatesObj[stateAbb]].stickers.push(sticker.id);
                 } else {
                     pagesByStatesObj[stateAbb] = pagesByStates.length;
