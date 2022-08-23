@@ -324,6 +324,6 @@ export default {
         openPacks,
         getDeck,
         signUpFreePacks,
-        signInFreePacks
+        signInFreePacks,
     }
 };

@@ -57,12 +57,19 @@ async function toggleMarkCard (req: Request, res: Response) {
     res.sendStatus(200);
 }
 
+async function realizeNewPacks (req: Request, res: Response) {
+    loggerUtils.log('controller', 'Realizing packs');
+    const userId = res.locals.user.id;
+    await services.person.actions.signInFreePacks(userId);
+    res.sendStatus(200);
+}
 
 export default {
     getDeck,
     getOtherUserDeck,
     openAllDeckPacks,
     openOneDeckPack,
+    realizeNewPacks,
     pasteAllCards,
     pasteCard,
     toggleMarkCard

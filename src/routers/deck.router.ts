@@ -26,6 +26,13 @@ router.post("/packs/open-one",
     ct.deck.openOneDeckPack
 );
 
+
+router.post("/packs/realize",
+    mw.help.logRoute("Open all deck packs"),
+    mw.auth.validateToken,
+    ct.deck.realizeNewPacks
+);
+
 // post deck/paste-all
 router.post("/paste-all",
     mw.help.logRoute("Paste all cards"),
