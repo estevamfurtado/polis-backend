@@ -5,6 +5,7 @@ import rankingService from './ranking.service.js';
 import pageService from './page.service.js';
 import loggerUtils from '../utils/logger.utils.js';
 import variables from './variables.js';
+import services from './index.js';
 
 type Element = Prisma.Album;
 type CreateInput = Prisma.Prisma.AlbumCreateInput;
@@ -49,6 +50,14 @@ async function getLastAlbum() {
     return album;
 }
 
+export type FunctionalPage = {
+    title: string,
+    badge?: string,
+    description?: string,
+    color?: string,
+    stickers: number[],
+}
+
 async function getCompleteLastAlbum() : Promise<AlbumResponse> {
     const completeAlbum = await repo.getCompleteAlbum(variables.LAST_YEAR);
 
@@ -61,7 +70,21 @@ async function getCompleteLastAlbum() : Promise<AlbumResponse> {
     const pages = {}
     const stickers = {}
 
+    const pagesByParties:FunctionalPage[] = [];
+    const pagesByStates:FunctionalPage[] = [];
+    const pagesByStatesObj:{[key: string]: number} = {};
+
+
     for (const page of completeAlbum.pages) {
+
+
+        pagesByParties.push({
+            badge: page.badge,
+            title: page.title,
+            description: page.description,
+            color: page.backgroundColor,
+            stickers: page.stickers.map(s => s.id)
+        })
 
         album.pages.push(page.id);
         pages[page.id] = {
@@ -70,17 +93,40 @@ async function getCompleteLastAlbum() : Promise<AlbumResponse> {
         }
 
         for (const sticker of page.stickers) {
-
             stickersLine.push(sticker.id);
-
             pages[page.id].stickers.push(sticker.id);
             stickers[sticker.id] = {
                 ...sticker,
             }
+            
+            const stateAbb = sticker.politicianRecord?.stateAbbreviation ?? null;
+            const stateName = sticker.politicianRecord?.state.name  ?? null;
+
+            
+            if (stateAbb && stateName) {
+                
+                console.log(pagesByStatesObj[stateAbb]);
+                
+                
+                if (pagesByStatesObj[stateAbb] && pagesByStatesObj[stateAbb] > -1) {
+                    pagesByStates[pagesByStatesObj[stateAbb]].stickers.push(sticker.id);
+                } else {
+                    pagesByStatesObj[stateAbb] = pagesByStates.length;
+                    pagesByStates.push({
+                        badge: stateAbb,
+                        title: stateName,
+                        description: `Estado`,
+                        stickers: [sticker.id]
+                    })
+                }
+                
+            }
+
         }
     }
 
-    return {album, pages, stickers, stickersLine};
+
+    return {album, pages, stickers, stickersLine, pagesByStates, pagesByParties};
 }
 
 type AlbumResponse = {
@@ -96,6 +142,8 @@ type AlbumResponse = {
         [key: number]: Prisma.Sticker;
     },
     stickersLine: number[],
+    pagesByStates: FunctionalPage[],
+    pagesByParties: FunctionalPage[],
 }
 
 

@@ -74,7 +74,7 @@ async function validatePasswordOrCrash (password: string, encryptedPassword: str
 async function referredNewUser (referralId: number) : Promise<void> {
     const referral = await get(referralId);
     if (referral) {
-        referral.packs += 1;
+        referral.packs += variables.SIGN_IN_FREE_PACKS * 5;
         await repo.update.whereId(referral.id, referral);
     }
 }
@@ -102,7 +102,7 @@ async function openPacks (personId: number, packs?: number) {
 
 async function getDeck (userId: number) {
 
-    const {album, pages, stickers, stickersLine} = await albumService.getCompleteLastAlbum();
+    const {album, pages, stickers, stickersLine, pagesByParties, pagesByStates} = await albumService.getCompleteLastAlbum();
     
     const person = await validateOrCrash(userId);
     const packs = {
@@ -139,6 +139,7 @@ async function getDeck (userId: number) {
         cards: processedCards,
         packs,
         exchangeRequests,
+        pagesByParties, pagesByStates
     }
 
     function process() {
