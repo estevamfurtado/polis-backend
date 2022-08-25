@@ -28,7 +28,7 @@ router.post("/packs/open-one",
 
 
 router.post("/packs/realize",
-    mw.help.logRoute("Open all deck packs"),
+    mw.help.logRoute("Realize packs"),
     mw.auth.validateToken,
     ct.deck.realizeNewPacks
 );

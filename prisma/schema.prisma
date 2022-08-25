@@ -29,7 +29,8 @@ model Person {
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now())
 
-  name     String
+  username String? @unique
+  name     String?
   cpf      String? @unique
   password String?
   phone    String?
@@ -42,6 +43,8 @@ model Person {
   skinColor     SkinColor?
 
   voteStateAbbreviation String?
+
+  politicalPosition PoliticalPosition?
 
   diplomaticAxis Int?
   economicAxis   Int?
@@ -402,4 +405,10 @@ enum FriendshipStatus {
   accepted
   rejected
   canceled
+}
+
+enum PoliticalPosition {
+  left
+  right
+  center
 }

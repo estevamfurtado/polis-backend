@@ -47,7 +47,15 @@ async function getByEmail (email: string) {
     try {
         return await db.findFirst({where: {email}});
     } catch (e) {
-        throw errorUtils.wrongSchema('Wrong email');
+        return null;
+    }
+}
+
+async function getByUsername (username: string) {
+    try {
+        return await db.findFirst({where: {username}});
+    } catch (e) {
+        return null;
     }
 }
 
@@ -63,8 +71,9 @@ async function update (id: number, person: UpdateInput) {
     try {
         return await db.update({where: {id}, data: person});
     } catch (e) {
-        throw errorUtils.wrongSchema('Wrong schema');
+        return null;
     }
+    return null;
 }
 
 async function getEncryptedPassword (email: string) {
@@ -72,6 +81,21 @@ async function getEncryptedPassword (email: string) {
         return await db.findFirst({
             where: {
                 email
+            },
+            select: {
+                password: true
+            }
+        });
+    } catch (e) {
+        throw errorUtils.wrongSchema('Wrong schema');
+    }
+}
+
+async function getEncryptedPasswordByUsername (username: string) {
+    try {
+        return await db.findFirst({
+            where: {
+                username
             },
             select: {
                 password: true
@@ -91,6 +115,7 @@ async function searchByEmail (incompleteEmail: string) {
             isActive: true
         },
         select: {
+            username: true,
             email: true,
             name: true,
             id: true
@@ -101,8 +126,32 @@ async function searchByEmail (incompleteEmail: string) {
     return response;
 }
 
+async function searchByUsername (incompleteUsername: string) {
+    const max=5;
+    const email = incompleteUsername.toLowerCase();
+    const response = await db.findMany({
+        where: {
+            isActive: true,
+            OR: {
+                username: {contains: incompleteUsername},
+                email: {contains: incompleteUsername}
+            }
+        },
+        select: {
+            username: true,
+            email: true,
+            name: true,
+            id: true
+        },
+        orderBy: {lastFreePackAt: 'asc'},
+        take: max
+    });
+    return response;
+}
+
 export default {
     searchByEmail,
+    searchByUsername,
     create: {
         many: createMany,
         one: create
@@ -111,10 +160,12 @@ export default {
         vanilla: {
             whereId: get,
             whereEmail: getByEmail,
-            whereCpf: getByCpf
+            whereCpf: getByCpf,
+            whereUsername: getByUsername
         },
         encryptedPasword: {
             whereEmail: getEncryptedPassword,
+            whereUsername: getEncryptedPasswordByUsername,
         }
     },
     update: {

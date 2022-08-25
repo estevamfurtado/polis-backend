@@ -3,32 +3,43 @@ import AppError from '../utils/errors/error.utils.js';
 import personService from './person.service.js';
 import repos from '../repositories/index.js';
 import { crypt } from '../utils/crypt/index.js';
-import { Person, Prisma } from '@prisma/client';
+import { Person, PoliticalPosition, Prisma } from '@prisma/client';
 import loggerUtils from '../utils/logger.utils.js';
 import stateService from './state.service.js';
 import albumService from './album.service.js';
+import { number } from 'joi';
 
 
-type SignUp = Prisma.PersonCreateInput&{voteStateAbbreviation: string};
+type SignUp = {
+    username: string | null;
+    password: string | null;
+    voteStateAbbreviation: string | null;
+    month: number | null;
+    year: number | null;
+    politicalPosition: string | null;
+}
+
+
 
 async function signUp (data: SignUp, referralId?: number) {
 
     loggerUtils.log('service', 'Signing Up');
     
-    await personService.get.byEmail.andCrash(data.email);
-    await stateService.validate.byAbbreviation.orCrash(data.voteStateAbbreviation);
-    data.voteState = {connect: {abbreviation: data.voteStateAbbreviation}};
-    delete data.voteStateAbbreviation;
+    const input: Prisma.PersonCreateInput = {
+        username: data.username.trim().toLowerCase(),
+        password: crypt.bcrypt.encrypt(data.password),
+        voteState: {connect: {abbreviation: data.voteStateAbbreviation}},
+        birthDate: new Date(data.year, data.month),
+        politicalPosition: data.politicalPosition as PoliticalPosition,
+        isActive: true,
+    }
 
-    data.cpf = data.cpf.replace(/\./g, '').replace(/-/g, '');
-    data.password = crypt.bcrypt.encrypt(data.password);
-    data.birthDate = new Date(data.birthDate);
-
-    await personService.get.byCpf.andCrash(data.cpf);
+    await personService.get.byUsername.andCrash(input.username);
+    await stateService.validate.byAbbreviation.orCrash(data.voteStateAbbreviation);    
     
-    data.isActive = true;
+    // console.log(data);
 
-    const newUser = await personService.create.orCrash(data);
+    const newUser = await personService.create.orCrash(input);
     
     await personService.actions.signUpFreePacks(newUser.id);
 
@@ -37,11 +48,34 @@ async function signUp (data: SignUp, referralId?: number) {
     }
 }
 
-async function signIn (dados: {email: string, password: string}) {
+async function migrateEmailToUsername(id: number, email: string) {
+    let username = email.split('@')[0]
+    let created = false;
+    while (!created) {
+        const existingUser = await personService.get.byUsername.only(username);
+        if (!existingUser) {
+            const newUser = await personService.update.byId(id, {username});
+            return newUser;
+        } else {
+            username = username + `${Math.floor(Math.random() * 20)}`
+        }
+    }
+}
+
+async function signIn ({username, password}:{username: string, password: string}) {
     loggerUtils.log('service', 'Signing In');
-    const user = await personService.get.byEmail.orCrash(dados.email);
-    const encryptedPassword = await repos.person.get.encryptedPasword.whereEmail(dados.email);
-    await personService.validate.password.orCrash(dados.password, encryptedPassword.password ?? '');
+    
+    let user = await personService.get.byEmail.only(username);
+    if (user && !user.username) {
+        user = await migrateEmailToUsername(user.id, user.email)
+    }
+    if (!user) {
+        user = await personService.get.byUsername.orCrash(username);
+    }
+
+    const encryptedPassword = await repos.person.get.encryptedPasword.whereUsername(username);
+    await personService.validate.password.orCrash(password, encryptedPassword.password ?? '');
+    
     await personService.actions.signInFreePacks(user.id);
     const token = crypt.jwt.create(user);
     return token;

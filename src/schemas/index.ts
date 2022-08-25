@@ -1,20 +1,26 @@
 import Prisma from "@prisma/client";
 import joi from "joi";
 
-const {EconomicClass, SkinColor} = Prisma;
+const {EconomicClass, SkinColor, PoliticalPosition} = Prisma;
 
 export const SignUp = joi.object().keys({
-    name: joi.string().min(5).required(),
-    email: joi.string().email().required(),
+    username: joi.string().min(5).required(), 
     password: joi.string().min(4).required(),
-    cpf: joi.string().regex(/^\d{3}\.\d{3}\.\d{3}\-\d{2}$/).required(),
     voteStateAbbreviation: joi.string().length(2).required(),
     
+    name: joi.string().min(5),
+    email: joi.string().email(),
+    cpf: joi.string().regex(/^\d{3}\.\d{3}\.\d{3}\-\d{2}$/),
     phone: joi.string().regex(/^\d{2} \d{4,5}-\d{4}$/),
-    birthDate: joi.date(),
+    
     skinColor: joi.string().valid(...Object.values(SkinColor)),
     economicClass: joi.string().valid(...Object.values(EconomicClass)),
+    
+    birthDate: joi.date(),
+    year: joi.number().max(2020).min(1900),
+    month: joi.number().max(12).min(1),
 
+    politicalPosition: joi.string().valid(...Object.values(PoliticalPosition)),
     diplomaticAxis: joi.number().min(0).max(100),
     economicAxis: joi.number().min(0).max(100),
     civilAxis: joi.number().min(0).max(100),

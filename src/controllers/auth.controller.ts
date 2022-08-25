@@ -5,8 +5,8 @@ import loggerUtils from "../utils/logger.utils.js";
 
 async function signIn (req: Request, res: Response) {
     loggerUtils.log('controller', 'Signing In');
-    const { email, password } = req.body;
-    const token = await services.auth.signIn({email, password});
+    const { username, password } = req.body;
+    const token = await services.auth.signIn({username, password});
 
     loggerUtils.log('return', 'Signed in');
     res.status(200).send({token});

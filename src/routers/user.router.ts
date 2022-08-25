@@ -42,11 +42,11 @@ router.get("/invite",
     ct.user.getUserInvite
 );
 
-router.get('/search/email',
+router.get('/search/username',
     mw.help.logRoute("Get users by email"),
     mw.auth.validateToken,
     mw.set.localsFromRequestData,
-    ct.user.getUsersByEmail,
+    ct.user.getUsersByUsername,
 );
 
 router.get('/deck/:personId',

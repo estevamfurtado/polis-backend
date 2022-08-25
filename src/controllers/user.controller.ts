@@ -11,16 +11,16 @@ async function getUser (req: Request, res: Response) {
     res.send(user);
 }
 
-async function getUsersByEmail (req: Request, res: Response) {
+async function getUsersByUsername (req: Request, res: Response) {
 
-    const {email} = req.query;
+    const {username} = req.query;
 
-    if (!email) {
+    if (!username) {
         res.sendStatus(400);
         return;
     }
 
-    const users = await services.person.search.byEmail(email as string);
+    const users = await services.person.search.byUsername(`${username}`);
     res.send(users);
 }
 
@@ -40,5 +40,5 @@ export default {
     putCandidateProfile,
     postCandidateProfile,
     getUserInvite,
-    getUsersByEmail,
+    getUsersByUsername,
 }

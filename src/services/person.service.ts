@@ -40,6 +40,22 @@ async function createOrCrash (person: CreateInput) : Promise<Element> {
     return user;
 }
 
+async function findByUsernameAndCrash (username: string) {
+    loggerUtils.log('service', 'Find person by email or crash');
+    const result = await repo.get.vanilla.whereUsername(username);
+    if (result) {
+        throw AppError.conflict(`Person with username ${username} already exists`);
+    }
+}
+async function findByUsernameOrCrash (username: string) : Promise<Element> {
+    loggerUtils.log('service', 'Find person by username or crash');
+    const result = await repo.get.vanilla.whereUsername(username);
+    if (!result) {
+        throw AppError.notFound(`Person with username ${username} does not exist`);
+    }
+    return result;
+}
+
 async function findByEmailAndCrash (email: string) {
     loggerUtils.log('service', 'Find person by email or crash');
     const result = await repo.get.vanilla.whereEmail(email);
@@ -60,6 +76,16 @@ async function findByEmailOrCrash (email: string) : Promise<Element> {
     if (!result) {
         throw AppError.notFound(`Person with email ${email} does not exist`);
     }
+    return result;
+}
+
+async function findByEmail (email: string) {
+    const result = await repo.get.vanilla.whereEmail(email) ?? null;
+    return result;
+}
+
+async function findByUsername (username: string) {
+    const result = await repo.get.vanilla.whereUsername(username) ?? null;
     return result;
 }
 
@@ -84,14 +110,11 @@ async function openPacks (personId: number, packs?: number) {
     loggerUtils.log('service', 'Opening packs');
 
     const person = await validateOrCrash(personId);
-    // console.log(person.id)
 
     if (person.packs > 0) {
         let amount = packs ? (person.packs > packs ? packs: person.packs) : person.packs;
-        // console.log(`PACKS: ${person.packs} - ${amount} = ${person.packs - amount}`);
         person.packs -= amount;
         const cardsAmount = amount * variables.CARDS_PER_PACK;
-        // console.log(`CARDS: ${cardsAmount} to ${person.id} (${personId})`);
         await cardService.createRandomNewCardsToUser(personId, cardsAmount);
         const updated = await repo.update.whereId(personId, person);
     } else {
@@ -251,10 +274,6 @@ type ProcessedSticker = Prisma.Sticker & {
 
 
 
-
-
-
-
 async function createMany (people: CreateInput[]) {
     loggerUtils.log('service', 'Creating many people');
     await repo.create.many(people);
@@ -293,9 +312,25 @@ async function searchByEmail (email: string) {
     return result;
 }
 
+async function searchByUsername (username: string) {
+    loggerUtils.log('service', 'Searching by username');
+    const result = await repo.searchByUsername(username);
+    return result;
+}
+
+async function update (id: number, data: Prisma.Prisma.PersonUpdateInput) {
+    return await repo.update.whereId(id, data)
+}
+
 
 export default { 
-    search: { byEmail: searchByEmail},
+    update: {
+        byId: update,
+    },
+    search: { 
+        byEmail: searchByEmail,
+        byUsername: searchByUsername,
+    },
     get: {
         byId: {
             only: get,
@@ -303,7 +338,13 @@ export default {
         },
         byEmail: {
             andCrash: findByEmailAndCrash,
-            orCrash: findByEmailOrCrash
+            orCrash: findByEmailOrCrash,
+            only: findByEmail,
+        },
+        byUsername: {
+            andCrash: findByUsernameAndCrash,
+            orCrash: findByUsernameOrCrash,
+            only: findByUsername
         },
         byCpf: {
             andCrash: findByCpfAndCrash,
