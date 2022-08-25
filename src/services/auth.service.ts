@@ -66,6 +66,7 @@ async function signIn ({username, password}:{username: string, password: string}
     loggerUtils.log('service', 'Signing In');
     
     let user = await personService.get.byEmail.only(username);
+
     if (user && !user.username) {
         user = await migrateEmailToUsername(user.id, user.email)
     }
@@ -73,11 +74,15 @@ async function signIn ({username, password}:{username: string, password: string}
         user = await personService.get.byUsername.orCrash(username);
     }
 
-    const encryptedPassword = await repos.person.get.encryptedPasword.whereUsername(username);
-    await personService.validate.password.orCrash(password, encryptedPassword.password ?? '');
+    // console.log('tem user');
+
+    await personService.validate.password.orCrash(password, user.password ?? '');
     
     await personService.actions.signInFreePacks(user.id);
     const token = crypt.jwt.create(user);
+
+    // console.log(token);
+
     return token;
 }
 
