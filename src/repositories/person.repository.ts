@@ -132,10 +132,10 @@ async function searchByUsername (incompleteUsername: string) {
     const response = await db.findMany({
         where: {
             isActive: true,
-            OR: {
-                username: {contains: incompleteUsername},
-                email: {contains: incompleteUsername}
-            }
+            OR: [
+                {username: {contains: incompleteUsername}},
+                {email: {contains: incompleteUsername}}
+            ]
         },
         select: {
             username: true,
