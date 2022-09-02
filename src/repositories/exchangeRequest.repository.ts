@@ -63,14 +63,16 @@ function getPendingByUserId (userId: number) {
                 select: {
                     id: true,
                     name: true,
-                    email: true
+                    email: true,
+                    username: true,
                 }
             },
             requested: {
                 select: {
                     id: true,
                     name: true,
-                    email: true
+                    email: true,
+                    username: true,
                 },
             }
         }

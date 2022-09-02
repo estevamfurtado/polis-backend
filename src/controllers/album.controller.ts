@@ -5,8 +5,7 @@ import { arrayToObject } from "../utils/arrayToObject.js";
 async function getLastAlbum (req: Request, res: Response) {
     
     const album = await services.album.getCompleteLastAlbum();
-
-    res.send({album});
+    res.send(album);
 }
 
 export default {

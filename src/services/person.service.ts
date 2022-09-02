@@ -4,10 +4,7 @@ import Prisma, { Person } from '@prisma/client';
 import { crypt } from '../utils/crypt/index.js';
 import cardService from './card.service.js';
 import loggerUtils from '../utils/logger.utils.js';
-import { arrayToObject } from '../utils/arrayToObject.js';
 import variables from './variables.js';
-import albumService from './album.service.js';
-import pageService from './page.service.js';
 import exchangeRequestService from './exchangeRequest.service.js';
 
 
@@ -123,9 +120,9 @@ async function openPacks (personId: number, packs?: number) {
 }
 
 
-async function getDeck (userId: number) {
 
-    const {album, pages, stickers, stickersLine, pagesByParties, pagesByStates} = await albumService.getCompleteLastAlbum();
+
+async function getDeck (userId: number) {
     
     const person = await validateOrCrash(userId);
     const packs = {
@@ -135,7 +132,6 @@ async function getDeck (userId: number) {
     }
 
     const cards = await cardService.getAllByOwner(userId);
-    const processedStickers : ProcessedStickers = {};
     const processedCards : ProcessedCards = {
         cards: {},
         deck: {
@@ -150,85 +146,75 @@ async function getDeck (userId: number) {
             }
         }
     };
+    const bySticker : {[key: number]: CardsCatalog} = {}
 
     process();
 
     const exchangeRequests = await exchangeRequestService.getPendingByUserIdOrCrash(userId);
 
     return {
-        album,
-        pages,
-        stickers: processedStickers, 
-        cards: processedCards,
+        cards: {
+            ...processedCards, bySticker
+        },
         packs,
         exchangeRequests,
-        pagesByParties, pagesByStates
     }
 
     function process() {
     
-        stickersLine.forEach(s => {
-            const sticker = stickers[s];
-            if (sticker) {
-                processedStickers[s] = {
-                    ...sticker,
-                    cards: {
+        cards.forEach(card => {
+
+            if (!bySticker[card.stickerId]) {
+                bySticker[card.stickerId] = {
+                    all: [],
+                    pasted: [],
+                    notPasted: {
                         all: [],
-                        pasted: [],
-                        notPasted: {
-                            all: [],
-                            new: [],
-                            repeated: [],
-                            favorites: [],
-                            recent: []
-                        }
+                        new: [],
+                        repeated: [],
+                        favorites: [],
+                        recent: [],
                     }
                 }
             }
-        })
-
-        cards.forEach(card => {
 
             processedCards.cards[card.id] = card;
-            const sticker = processedStickers[card.stickerId] ?? null;
 
             const isPasted = card.isPasted;
             const isRecent = card.createdAt.getTime() > (new Date().getTime() - 1000*60*60);
             const isFavorite = !card.forExchange;
 
             processedCards.deck.all.push(card.id);
-            if (sticker) {sticker.cards.all.push(card.id);}
+            bySticker[card.stickerId].all.push(card.id);
+
             if (isPasted) {
                 processedCards.deck.pasted.push(card.id);
-                if (sticker) {sticker.cards.pasted.push(card.id);}
+                bySticker[card.stickerId].pasted.push(card.id);
             } else {
                 processedCards.deck.notPasted.all.push(card.id);
-                if (sticker) {sticker.cards.notPasted.all.push(card.id);}
-
+                bySticker[card.stickerId].notPasted.all.push(card.id);
+                
                 if (isFavorite) {
                     processedCards.deck.notPasted.favorites.push(card.id);
-                    if (sticker) {sticker.cards.notPasted.favorites.push(card.id);}
+                    bySticker[card.stickerId].notPasted.favorites.push(card.id);
                 }
                 if (isRecent) {
                     processedCards.deck.notPasted.recent.push(card.id);
-                    if (sticker) {sticker.cards.notPasted.recent.push(card.id);}
+                    bySticker[card.stickerId].notPasted.recent.push(card.id);
                 }
             }
             
         })
 
-        processedCards.deck.notPasted.all.forEach(id => {
-            const sticker = processedStickers[processedCards.cards[id].stickerId] ?? null;
-            if (sticker) {
-                const isRepeated = sticker.cards.pasted.length > 0;
-                if (isRepeated) {
-                    processedCards.deck.notPasted.repeated.push(id);
-                    if (sticker) {sticker.cards.notPasted.repeated.push(id);}
-                }
-                else {
-                    processedCards.deck.notPasted.new.push(id);
-                    if (sticker) {sticker.cards.notPasted.new.push(id);}
-                }
+        cards.forEach(card => {
+
+            const isRepeated = 
+                bySticker[card.stickerId].pasted.length > 0 && 
+                bySticker[card.stickerId].pasted[0] !== card.id;
+
+            if (isRepeated) {
+                processedCards.deck.notPasted.repeated.push(card.id);
+                bySticker[card.stickerId].notPasted.repeated.push(card.id);
             }
         })
     }
@@ -256,18 +242,21 @@ type ProcessedStickers = {
     [key: number]: ProcessedSticker
 }
 
-type ProcessedSticker = Prisma.Sticker & {
-    cards: {
+type CardsCatalog = {
+    all: number[],
+    pasted: number[],
+    notPasted: {
         all: number[],
-        pasted: number[],
-        notPasted: {
-            all: number[],
-            new: number[],
-            repeated: number[],
-            favorites: number[],
-            recent: number[],
-        }
+        new: number[],
+        repeated: number[],
+        favorites: number[],
+        recent: number[],
     }
+}
+
+
+type ProcessedSticker = Prisma.Sticker & {
+    cards: CardsCatalog
 }
 
 

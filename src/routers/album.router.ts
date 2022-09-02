@@ -7,7 +7,6 @@ const router = Router();
 
 router.get('/',
     mw.help.logRoute('Get last album'),
-    mw.auth.validateToken,
     ct.album.getLastAlbum
 );
 

@@ -77,7 +77,6 @@ async function getCompleteLastAlbum() : Promise<AlbumResponse> {
 
     for (const page of completeAlbum.pages) {
 
-
         pagesByParties.push({
             badge: page.badge,
             title: page.title,
