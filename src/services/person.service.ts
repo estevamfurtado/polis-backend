@@ -207,14 +207,14 @@ async function getDeck (userId: number) {
         })
 
         cards.forEach(card => {
-
-            const isRepeated = 
-                bySticker[card.stickerId].pasted.length > 0 && 
-                bySticker[card.stickerId].pasted[0] !== card.id;
-
-            if (isRepeated) {
+            const hasPasted = bySticker[card.stickerId].pasted.length > 0;
+            const hasNew = bySticker[card.stickerId].notPasted.new.length > 0;
+            if (hasPasted || hasNew) {
                 processedCards.deck.notPasted.repeated.push(card.id);
                 bySticker[card.stickerId].notPasted.repeated.push(card.id);
+            } else {
+                processedCards.deck.notPasted.new.push(card.id);
+                bySticker[card.stickerId].notPasted.new.push(card.id);
             }
         })
     }
