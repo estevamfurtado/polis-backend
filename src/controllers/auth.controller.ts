@@ -8,8 +8,10 @@ async function signIn (req: Request, res: Response) {
     const { username, password } = req.body;
     const token = await services.auth.signIn({username, password});
 
+    const user = await services.person.get.byUsername.orCrash(username);
+
     loggerUtils.log('return', 'Signed in');
-    res.status(200).send({token});
+    res.status(200).send({token, user});
 }
 
 async function signUp (req: Request, res: Response) {
