@@ -6,6 +6,6 @@ EXPOSE 4000
 
 COPY . .
 
-RUN npm install
+RUN npm install -f
 
 CMD npm run docker:dockerfile
