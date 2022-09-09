@@ -1,5 +1,6 @@
-version: '1.0'
+version: '3.8'
 services:
+
   polis-postgres:
     container_name: polis-postgres
     image: postgres:13
@@ -12,12 +13,13 @@ services:
       - postgres:/var/lib/postgresql/data
     networks:
       - polis-network
+      
   polis-redis:
     container_name: polis-redis
     image: redis:6.2-alpine
     restart: always
     ports:
-      - 6379:6379
+      - 7380:6379
     command: redis-server --save 20 1 --loglevel warning --requirepass ${REDIS_PASSWORD}
     env_file:
       - .env
@@ -25,6 +27,7 @@ services:
       - redis:/data
     networks:
       - polis-network
+
   polis-server:
     container_name: polis-server
     build: .
@@ -37,6 +40,7 @@ services:
       - polis-redis
     networks:
       - polis-network
+
 volumes:
   postgres:
   redis:

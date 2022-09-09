@@ -2,10 +2,10 @@ FROM node:16
 
 WORKDIR /app
 
-COPY . . 
+EXPOSE 4000
 
-EXPOSE 5000
+COPY . .
 
-RUN npm i
+RUN npm install
 
 CMD npm run docker:dockerfile
