@@ -3,11 +3,10 @@
     "version": "1.0.0",
     "type": "module",
     "description": "",
-    "main": "index.js",
+    "main": "server.js",
     "scripts": {
-        "build": "tsc -p tsconfig.json",
-        "start": "node dist/src/server.js",
-        "test": "dotenv -e .env.test prisma migrate dev && NODE_OPTIONS=--experimental-vm-modules dotenv -e .env.test jest -- -i --coverage",
+        "build": "tsc",
+        "test": "dotenv -e .env.test prisma migrate dev && dotenv -e .env.test cross-env NODE_OPTIONS=--experimental-vm-modules jest -- -i",
         "test:unit": "NODE_OPTIONS=--experimental-vm-modules dotenv -e .env.test jest -- -i --coverage --testPathPattern=tests/unit",
         "test:prisma-reset": "dotenv -e .env.test npm run prisma:reset",
         "test:integration": "NODE_OPTIONS=--experimental-vm-modules dotenv -e .env.test jest -- -i --coverage --testPathPattern=tests/integration",
@@ -17,8 +16,12 @@
         "utils:ranking": "nodemon prisma/seed/get/ranking.ts",
         "utils:process": "nodemon prisma/seed/web/process.ts",
         "prisma:reset": "prisma migrate reset",
+        "prisma:migrate": "prisma migrate dev",
+        "prisma:deploy": "prisma migrate deploy",
+        "prisma:seed": "prisma db seed",
         "docker:dockerfile": "npm run build && npx prisma migrate deploy && npm start",
-        "docker:compose:dev": "docker-compose -f docker-compose.dev.yml up --build"
+        "docker:compose:dev": "docker-compose -f docker-compose.dev.yml up --build",
+        "start": "npm run prisma:deploy && npm run prisma:seed && node dist/src/server.js"
     },
     "keywords": [],
     "author": "",
