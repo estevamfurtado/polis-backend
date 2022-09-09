@@ -1,11 +1,11 @@
-FROM node:16
+FROM node
 
-WORKDIR /app
-
-EXPOSE 4000
+WORKDIR /usr/src/app
 
 COPY . .
 
-RUN npm install -f
+EXPOSE 5000
 
-CMD npm run docker:dockerfile
+RUN npm i && npm run build
+
+CMD ["npm", "start"]
