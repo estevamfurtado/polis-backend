@@ -1,11 +1,11 @@
-FROM node:16
+FROM node
 
-WORKDIR /app
+WORKDIR /usr/src/
 
-COPY . . 
+COPY . .
 
 EXPOSE 5000
 
-RUN npm i
+RUN npm i && npm run build
 
-CMD npm run docker:dockerfile
+CMD ["npm", "start"]
