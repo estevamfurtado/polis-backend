@@ -3,7 +3,7 @@ import { Prisma } from "@prisma/client";
 import * as depData from "./deputados.js";
 import * as partiesData from "./parties.js";
 import * as rankingData from "./rankings.js";
-import * as recordsData from "./records.js";
+import * as recordsData2022 from "./records/2022.js";
 import * as statesData from "./states.js";
 
 function generateDeputados(): Prisma.PersonCreateInput[] {
@@ -18,7 +18,7 @@ function generateDeputados(): Prisma.PersonCreateInput[] {
 }
 
 function generateRecords() {
-    const data = recordsData.records.data;
+    const data = recordsData2022.data.data;
     const records = data.map((r) => {
         const t = { ...r };
         const party = r.party.connect.abbreviation;
