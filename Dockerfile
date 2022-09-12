@@ -6,6 +6,9 @@ COPY . .
 
 EXPOSE 5000
 
-RUN npm i && npm run build
+RUN npm i
+RUN npm run build
 
-CMD ["npm", "start"]
+RUN npm run prisma:deploy
+RUN npm run prisma:seed
+RUN node dist/src/server.js
