@@ -1,0 +1,15 @@
+export const rankings = {
+    date: "2022-08-04T16:53:14.543Z",
+    data: [
+        { year: 2022, title: "Ranking dos Políticos" },
+        { year: 2021, title: "Ranking dos Políticos" },
+        { year: 2020, title: "Ranking dos Políticos" },
+        { year: 2019, title: "Ranking dos Políticos" },
+        { year: 2018, title: "Ranking dos Políticos" },
+        { year: 2017, title: "Ranking dos Políticos" },
+        { year: 2016, title: "Ranking dos Políticos" },
+        { year: 2015, title: "Ranking dos Políticos" },
+        { year: 2014, title: "Ranking dos Políticos" },
+        { year: 2013, title: "Ranking dos Políticos" },
+    ],
+};
