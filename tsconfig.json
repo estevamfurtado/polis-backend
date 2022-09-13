@@ -7,5 +7,14 @@
   },
   "ts-node": {
     "esm": true
-  }
+  },
+  "exclude": [
+    "node_modules",
+    "./node_modules",
+    "./node_modules/*",
+    "./node_modules/@types/node/index.d.ts",
+    "prisma",
+    "./prisma",
+    "./prisma/*",
+  ]
 }
