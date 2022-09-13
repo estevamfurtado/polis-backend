@@ -1,10 +1,9 @@
 {
   "compilerOptions": {
-    "esModuleInterop": true,
-    "module": "es2022",
-    "moduleResolution": "node",
     "outDir": "dist",
-    "target": "es2021"
+    "module": "es6",
+    "esModuleInterop": true,
+    "moduleResolution": "node"
   },
   "ts-node": {
     "esm": true

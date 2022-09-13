@@ -6,7 +6,7 @@
     "main": "index.js",
     "scripts": {
         "build": "tsc",
-        "start": "npm run prisma:deploy && node dist/src/server.js",
+        "start": "npm run prisma:deploy && npm run prisma:seed && node dist/src/server.js",
         "test": "dotenv -e .env.test prisma migrate dev && NODE_OPTIONS=--experimental-vm-modules dotenv -e .env.test jest -- -i --coverage",
         "test:unit": "NODE_OPTIONS=--experimental-vm-modules dotenv -e .env.test jest -- -i --coverage --testPathPattern=tests/unit",
         "test:prisma-reset": "dotenv -e .env.test npm run prisma:reset",
@@ -21,9 +21,26 @@
         "prisma:deploy": "prisma migrate deploy",
         "prisma:migrate": "prisma migrate dev"
     },
+    "prisma": {
+        "seed": "ts-node prisma/seed.ts"
+    },
     "keywords": [],
     "author": "",
     "license": "ISC",
+    "dependencies": {
+        "@prisma/client": "^3.13.0",
+        "axios": "^0.27.2",
+        "bcrypt": "^5.0.1",
+        "chalk": "^5.0.1",
+        "cors": "^2.8.5",
+        "cryptr": "^6.0.3",
+        "dotenv": "^10.0.0",
+        "express": "^4.17.1",
+        "express-async-errors": "^3.1.1",
+        "joi": "^17.4.1",
+        "jsonwebtoken": "^8.5.1",
+        "react-player": "^2.10.0"
+    },
     "devDependencies": {
         "@faker-js/faker": "^7.3.0",
         "@types/cors": "^2.8.12",
@@ -41,24 +58,7 @@
         "prisma-dbml-generator": "^0.9.1",
         "supertest": "^6.2.4",
         "ts-jest": "^28.0.7",
-        "ts-node": "^10.7.0",
+        "ts-node": "^10.9.1",
         "typescript": "^4.7.4"
-    },
-    "dependencies": {
-        "@prisma/client": "^3.13.0",
-        "axios": "^0.27.2",
-        "bcrypt": "^5.0.1",
-        "chalk": "^5.0.1",
-        "cors": "^2.8.5",
-        "cryptr": "^6.0.3",
-        "dotenv": "^10.0.0",
-        "express": "^4.17.1",
-        "express-async-errors": "^3.1.1",
-        "joi": "^17.4.1",
-        "jsonwebtoken": "^8.5.1",
-        "react-player": "^2.10.0"
-    },
-    "prisma": {
-        "seed": "ts-node prisma/seed.ts"
     }
 }
